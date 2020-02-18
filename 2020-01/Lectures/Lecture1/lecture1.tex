@@ -1,0 +1,441 @@
+\documentclass[aspectratio=169]{beamer}
+% \usepackage[utf8]{inputenc}
+\usetheme{metropolis}
+\usecolortheme{orchid}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{multirow}
+\usepackage[ruled]{algorithm2e}
+\usepackage{mathtools}
+\usepackage{caption}
+\usepackage{epstopdf}
+\usepackage{hyperref}
+\setbeamerfont{footnote}{size=\tiny}
+
+\usepackage{tikz}
+\usetikzlibrary{mindmap,shadows,tikzmark,positioning,arrows.meta}
+
+% Information boxes
+\newcommand*{\info}[4][16.3]{%
+  \node [ annotation, #3, scale=0.65, text width = #1em,
+          inner sep = 2mm ] at (#2) {%
+  \list{$\bullet$}{\topsep=0pt\itemsep=0pt\parsep=0pt
+    \parskip=0pt\labelwidth=8pt\leftmargin=8pt
+    \itemindent=0pt\labelsep=2pt}%
+    #4
+  \endlist
+  };
+}
+
+\tikzset{%
+  >={Latex[width=2mm,length=2mm]},
+  % Specifications for style of nodes:
+            base/.style = {rectangle, rounded corners, draw=black,
+                           minimum width=4cm, minimum height=1cm,
+                           text centered, font=\sffamily},
+  activityStarts/.style = {base, fill=blue!30},
+       startstop/.style = {base, fill=red!30},
+    activityRuns/.style = {base, fill=green!30},
+         process/.style = {base, minimum width=2.5cm, fill=orange!15,
+                           font=\ttfamily},
+}
+\renewcommand\textbullet{\ensuremath{\bullet}}
+\newcommand\scalemath[2]{\scalebox{#1}{\mbox{\ensuremath{\displaystyle #2}}}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+%%% Bibliography
+\usepackage[citestyle=numeric,style=numeric,backend=biber,doi=false,isbn=false,url=false]{biblatex}
+\addbibresource{references.bib}
+
+%%% Suppress biblatex annoying warning
+\usepackage{silence}
+\WarningFilter{biblatex}{Patching footnotes failed}
+
+%%% new theorems %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\theoremstyle{definition}
+\newtheorem{mydef}{Definition}
+
+\theoremstyle{plain}
+\newtheorem{mylemma}{Lemma}[section]
+\newtheorem{mytheorem}{Theorem}[section]
+\newtheorem{myproposition}{Proposition}[section]
+\newtheorem{myproblem}{Problem}[section]
+\newtheorem{mydefinition}{Definition}[section]
+\newtheorem{myassumption}{Assumption}[section]
+
+\theoremstyle{remark}
+\newtheorem{myremark}{Remark}[section]
+
+\newcounter{saveenumi}
+\newcommand{\seti}{\setcounter{saveenumi}{\value{enumi}}}
+\newcommand{\conti}{\setcounter{enumi}{\value{saveenumi}}}
+
+\resetcounteronoverlays{saveenumi}
+
+\title{Control de Sistemas}
+\subtitle{Clase 1: Introducción}
+\author{Gerardo Becerra, Ph.D.}
+\institute{Pontificia Universidad Javeriana\\ Departamento de Electrónica}
+\date{Enero 28, 2020}
+
+\begin{document}
+
+\frame{\titlepage}	
+
+% \frame{\tableofcontents}
+
+\section{Presentación del Curso}
+\begin{frame}[<+->]\frametitle{Descripción General del Curso}
+\begin{itemize}
+  \item El curso está dedicado al diseño e implementación de sistemas de control de entrada sencilla - salida sencilla mediante sistemas digitales.
+  \item Se estudian procedimientos de análisis y diseño de controladores en el dominio del tiempo y la frecuencia.
+  \item Se desarrollan proyectos en los que se implementan sistemas de control mediante:
+  \begin{itemize}
+    \item Construcción de modelos
+    \item Diseño de la estrategia de control
+    \item Implementación de la solución
+    \item Validación de la solución.
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Estrategias Pedagógicas del Curso}
+\begin{itemize}
+  \item Asignación de lecturas para estudio individual anterior y posterior a la clase.
+  \item Exposiciones teóricas por parte del profesor (sesiones teóricas).
+  \item Desarrollo de proyectos de aplicación (sesiones prácticas).
+  \item Uso de herramientas de simulación y diseño de controladores.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Actividades de Evaluación del Curso}
+\centering
+\begin{tabular}{c|c|c}
+  \textbf{Componente}     & \textbf{Fecha}    & \textbf{Valor}\\
+  \hline
+  Examen parcial & Semana 8 & 25\% \\
+  Proyecto control PID & Semana 13 & 20\% \\
+  Proyecto control espacio de estados & Semana 18 & 20\% \\
+  Examen final & Semana 16 & 25\% \\
+  Tareas & Permanente & 10\%
+\end{tabular}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Contenidos Generales del Curso}
+\begin{enumerate}
+  \item Capítulo 1: Fundamentos de sistemas de control
+  \begin{enumerate}
+     \item Elementos de un lazo de control
+     \item Modelos de sistemas dinámicos
+     \begin{itemize}
+       \item Ecuaciones diferenciales
+       \item Funciones de transferencia
+       \item Espacio de estados
+     \end{itemize}
+    \item Especificaciones de desempeño
+    \item Controlador proporcional - integral - derivativo (PID)
+   \end{enumerate}
+   \item Capítulo 2: Diseño de controladores clásicos
+   \begin{enumerate}
+     \item Metodología de diseño de sistemas de control
+     \item Método por lugar de las raíces
+   \end{enumerate}
+   \seti
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Contenidos Generales del Curso (cont)}
+\begin{enumerate}
+  \conti
+  \item Capítulo 3: Implementación digital de controladores
+  \begin{enumerate}
+    \item Acondicionamiento de señal
+    \item Métodos de discretización
+    \item Soluciones micro-controladas
+    \item Manejo de actuadores - PWM    
+  \end{enumerate}
+  \item Capítulo 4: Control por variables de estado
+  \begin{enumerate}
+    \item Ubicación de polos
+    \item Controlabilidad - observabilidad
+    \item Observadores de estado
+  \end{enumerate}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Contenidos Detallados del Curso}
+\centering
+\scriptsize
+\begin{tabular}{c|c|p{11cm}}
+  \textbf{Semana} & \textbf{Sesión} & \textbf{Tema} \\
+  \hline
+  1  & Teoría & Introducción al curso - Fundamentos de sistemas de control  \\
+  \hline
+  2  & Teoría & Modelos de Sistemas Dinámicos (Ec. Difererenciales, Función Transferencia, Espacio de Estados, 1er/2do orden, tipos de entrada, respuestas) \\
+  \hline
+  \multirow{2}{*}{3}  & Teoría     & Diagramas de bloque en lazo cerrado\\
+                      & Práctica   & P1: Modelado de Sistemas Dinámico usando Matlab/Simulink \\
+  \hline
+  \multirow{2}{*}{4}  & Teoría     & Estabilidad de sistemas realimentados - Lugar geométrico de las raíces (LGR) \\
+                      & Práctica   & P1: Modelado de Sistemas Dinámicos usando Matlab/Simulink \\
+  \hline
+  \multirow{2}{*}{5}  & Teoría     & Especificaciones de desempeño \\
+                      & Práctica   & P2: Microcontroladores, PWM, ADC \\
+  \hline
+  \multirow{2}{*}{6}  & Teoría     & Controlador PID (on/off, P, PI, PD, PID) \\
+                      & Práctica   & P2: Microcontroladores, PWM, ADC \\
+  \hline
+  7  & Teoría & Técnicas de Sintonización \\
+  \hline
+  \multirow{2}{*}{8}  &            & Taller Pre-parcial \\
+                      &            & \textbf{Examen Parcial} \\
+  \hline
+  \multirow{2}{*}{9}  & Teoría     & Lugar Geométrico de las raíces - LGR \\
+                      & Práctica   & P3: Identificación modelo de motor DC para control de posición con potenciómetro \\
+\end{tabular}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Contenidos Detallados del Curso}
+\centering
+\scriptsize
+\begin{tabular}{c|c|p{11cm}}
+  \textbf{Semana} & \textbf{Sesión} & \textbf{Tema} \\
+  \hline
+  \multirow{2}{*}{10} & Teoría     & Compensadores por LGR (adelanto, atraso, adelanto-atraso)\\
+                      & Práctica   & P3: Identificación modelo de motor DC para control de posición con potenciómetro \\
+  \hline
+  \multirow{2}{*}{11} & Teoría     & Introducción al control digital \\
+                      & Práctica   & P4: Control de posición de un motor DC usando Simulink \\
+  \hline                    
+  \multirow{2}{*}{12} & Teoría     & Implementación digital de controladores (ZoH, PID digital, ecuación en diferencias) \\
+                      & Práctica   & P4: Control de posición de un motor DC usando Simulink \\
+  \hline                      
+  \multirow{2}{*}{13} & Teoría     & Modelos en variables de estado \\
+                      & Práctica   & P5: Control digital de posición de un motor DC usando Arduino \\
+  \hline                    
+  \multirow{2}{*}{14} & Teoría     & Linealización de modelos dinámicos (variables de estado) \\
+                      & Práctica   & P5: Control digital de posición de un motor DC usando Arduino \\
+  \hline                    
+  15  & Teoría & Control por variables de estado \\
+  \hline                    
+  \multirow{2}{*}{16} &            & Taller Pre-parcial \\
+                      &            & \textbf{Examen Final} \\
+  \hline                    
+  17  & Práctica & P6: Control por realimentación de estados para un péndulo invertido usando Simulink \\
+  \hline                    
+  18  & Práctica & P6: Control por realimentación de estados para un péndulo invertido usando Simulink \\
+\end{tabular}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Bibliografía del Curso}
+\begin{itemize}
+  \item Dorf, R. C., Bishop, (2011). Sistemas de control moderno. Pearson Prentice Hall.
+  \item Golnaraghi, F., \& Kuo, B. C. (2010). Automatic control systems. Wiley.
+  \item Franklin, G. F., Powell, J. D., \& Workman, M. L. (2006). Digital control of dynamic systems. Menlo Park: Addison-wesley.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->][c]\frametitle{Declaración de los Reglamentos}
+\textbf{Informes de las prácticas:}
+\begin{itemize}
+  \item Los informes serán entregados después de la práctica, según fecha y formato acordados.
+  \item Los grupos que no entreguen el informe dentro del plazo respectivo obtendrán una nota de 0,0.
+  \item Los informes deben realizarse con la información obtenida por el grupo en el desarrollo del laboratorio. No se deben utilizar datos de otros grupos. En caso que así suceda, la nota que se pondrá a los grupos que hayan utilizado los mismos datos será de 0,0 en el informe y el caso será reportado a la Dirección de Carrera para proceder de acuerdo a lo estipulado en el reglamento de estudiantes de la universidad.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->][c]\frametitle{Declaración de los Reglamentos}
+\textbf{Evaluaciones escritas:}
+\begin{itemize}
+  \item Objetos permitidos: lápiz, lapicero, minas, portaminas, borrador, calculadora (previa autorización del profesor).
+  \item Todo objeto diferente a los permitidos se considerará material no autorizado y deberá permanecer guardado en los morrales.
+  \item Objetos prohibidos: Teléfonos celulares, relojes inteligentes, apuntes, cuadernos, hojas, libros.
+  \item En caso de posesión de material no autorizado durante el examen, independientemente se esté manipulando o no, el profesor retirará el parcial y le impondrá nota de 0,0 en el examen. El caso será reportado a la Dirección de Carrera para proceder de acuerdo a lo estipulado en el reglamento de estudiantes de la Universidad.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Comunicación durante el curso}
+\begin{itemize}
+  \item Discord: \url{https://discordapp.com/download}
+  \item Enlace de invitación al servidor privado: \url{https://discord.gg/ApGwFvs}
+  \item Contenidos del curso.
+  \item Trabajos propuestos.
+  \item Discusiones y preguntas.
+\end{itemize}
+\end{frame}
+
+\section{Fundamentos de Sistemas de Control}
+
+\begin{frame}[<+->][c]\frametitle{Control de Sistemas - Introducción}
+\begin{itemize}
+  \item Ingenieros $\rightarrow$ crean productos para ayudar a las personas.
+  \item Entender, modelar y controlar materiales y fuerzas de la naturaleza.
+  \item Ingeniería de sistemas de control:
+  \begin{itemize}
+    \item Área de la ingeniería que busca entender, modelar y controlar segmentos del ambiente, llamados \textbf{sistemas}.
+    \item Basada en los principios de teoría de retroalimentación, análisis de sistemas lineales.
+    \item Fuertes fundamentos matemáticos y gran aplicabilidad en diversas áreas.
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Control de Sistemas - Importancia}
+\textbf{Por qué es importante el control?}
+\begin{itemize}
+  \item En robótica: \href{https://www.youtube.com/watch?v=wlkCQXHEgjA}{(video)} \href{https://www.youtube.com/watch?v=_sBBaNYex3E}{(video)}
+  \item En la industria automotriz: \href{https://www.youtube.com/watch?v=rbki4HR41-4}{(video)}
+  \item En vehículos autónomos: \href{https://www.youtube.com/watch?v=tlThdr3O5Qo}{(video)}
+  \item En la industria aeronáutica: \href{https://www.youtube.com/watch?v=GrP3jHuLQ9o}{(video)}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->][c]\frametitle{¿Qué es un sistema?}
+\begin{center}
+  \includegraphics[width=12cm]{images/planeSystem.png}
+\end{center}  
+\end{frame}
+
+\begin{frame}[<+->][c]\frametitle{¿Qué es un sistema?}
+\begin{center}
+  \includegraphics[width=12cm]{images/biologySistem.png}
+\end{center}  
+\end{frame}
+
+\begin{frame}[<+->][c]\frametitle{¿Qué es un sistema?}
+\begin{center}
+  \includegraphics[width=12cm]{images/socialNetwork.png}
+\end{center}  
+\end{frame}
+
+\begin{frame}[<+->][c]\frametitle{Sistema}
+\begin{itemize}
+  \item Interconexión de componentes, dispositivos o subsistemas.
+  \item Proceso que toma unas entradas y las transforma en salidas.
+  \begin{center}
+    \includegraphics[width=6cm]{images/sistema.png}
+  \end{center}
+  \item Relación entrada - salida: representa la relación causa - efecto del proceso.
+  \item Existe una frontera que separa los componentes internos del mundo externo.
+  \item Enfoque sistemático para analizar el comportamiento: modelos matemáticos.
+\end{itemize} 
+\end{frame}
+
+\begin{frame}[<+->][c]\frametitle{Sistema de Control}
+\begin{itemize}
+  \item Interconexión de componentes que forman una configuración que provee una respuesta deseada.
+  \item Sistema de control de lazo abierto: Usa un \textbf{controlador} y un \textbf{actuador} para obtener la respuesta del proceso deseada.
+  \begin{center}
+    \includegraphics[width=8cm]{images/openloopcontrol.png}
+  \end{center}  
+  \item Sistema de control de lazo cerrado: Utiliza una medida adicional de la salida para compararla con la respuesta deseada.
+  \begin{center}
+    \includegraphics[width=10cm]{images/closedloopcontrol.png}
+  \end{center}  
+\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->][c]\frametitle{Sistema de Control}
+  \vspace*{-0.2cm}
+  \begin{center}
+    \includegraphics[width=10cm]{images/closedloopcontrol2.png}
+  \end{center}
+  \vspace*{-0.7cm}
+  \begin{itemize}
+    \item Referencia (set-point): valor deseado de la variable controlada.
+    \item Variable controlada: cantidad o condición que se mide y controla. Normalmente es la salida del sistema.
+    \item Variable manipulada: cantidad o condición que el controlador modifica para afectar el valor de la variable controlada.
+    \item Perturbación: señal externa que ocasiona que la variable de control se desvíe del punto de control.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[<+->][c]\frametitle{Sistema de Control}
+  \vspace*{-0.2cm}
+  \begin{center}
+    \includegraphics[width=10cm]{images/closedloopcontrol2.png}
+  \end{center}
+  \vspace*{-0.7cm}
+  \begin{itemize}
+    \item Ruido de medida: señal externa que contamina la medición hecha con el sensor sobre la variable controlada.
+    \item Error: Diferencia entre la referencia y la medición obtenida mediante el sensor.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Sistemas de Control - Ejemplos: Vehículos autónomos}
+  \begin{center}
+    \includegraphics[width=8cm]{images/controlsystem_example1.png}
+  \end{center}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Sistemas de Control - Ejemplos: Operador humano en el lazo de control}
+  \begin{center}
+    \includegraphics[width=9cm]{images/controlsystem_example2.png}
+  \end{center}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Sistemas de Control - Ejemplos: Ingresos en una nación}
+  \begin{center}
+    \includegraphics[width=10cm]{images/controlsystem_example3.png}
+  \end{center}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Diseño de Sistemas de Control}
+  \begin{columns}
+    \begin{column}{0.4\textwidth}
+       \textbf{Objetivo:} Obtener la configuración, especificaciones e identificación de los parámetros clave del sistema propuesto para satisfacer los requerimientos.
+    \end{column}
+    \begin{column}{0.6\textwidth}
+      \begin{center}
+        \includegraphics[width=8cm]{images/controlsystemdesign.eps}
+      \end{center}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Taller - Sistemas de Control}
+\begin{enumerate}
+  \item Describa sensores típicos que puedan usarse para medir las siguientes variables:
+  \begin{itemize}
+    \item Posición lineal
+    \item Posición rotacional
+    \item Temperatura
+    \item Presión
+    \item Fuerza
+    \item Flujo de líquido
+    \item Campo magnético terrestre
+  \end{itemize}
+  \item Describa actuadores típicos que puedan convertir las siguientes variables:
+  \begin{itemize}
+    \item Energía eléctrica en energía mecánica
+    \item Deformación mecánica en energía eléctrica
+    \item Energía química en energía cinética
+    \item Calor en energía eléctrica
+  \end{itemize}
+  \seti
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Taller - Sistemas de Control (cont)}
+\begin{enumerate}
+  \conti
+  \item Una cámara con foco automático ajusta la distancia entre el lente y el sensor usando un rayo infrarojo para determinar la distancia al objetivo. Realice un bosquejo del diagrama de bloques de éste sistema de control especificando los diferentes componentes y señales. Explique brevemente su operación.
+  \seti
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Taller - Sistemas de Control (cont)}
+\begin{columns}
+  \begin{column}{0.5\textwidth}
+    \begin{enumerate}
+      \conti
+      \item Considere el péndulo invertido mostrado en la figura. El objetivo es mantener el péndulo en la posición vertical ($\theta = 0$) en la presencia de disturbios. Realice el bosquejo del diagrama de bloques del sistema de control. Identifique el proceso, sensor, actuador y controlador.
+    \end{enumerate}
+  \end{column} 
+  \begin{column}{0.5\textwidth}
+   \centering
+   \includegraphics[width=6cm]{images/invertedpendulum.eps}
+  \end{column} 
+\end{columns}
+\end{frame}
+
+\end{document}

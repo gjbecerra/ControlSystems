@@ -1,0 +1,549 @@
+\documentclass[aspectratio=169]{beamer}
+% \usepackage[utf8]{inputenc}
+\usetheme{metropolis}
+\usecolortheme{orchid}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{multirow}
+\usepackage[ruled]{algorithm2e}
+\usepackage{mathtools}
+\usepackage{caption}
+\usepackage{epstopdf}
+\usepackage{hyperref}
+\usepackage{verbatim}
+\usepackage[makeroom]{cancel}
+\setbeamerfont{footnote}{size=\tiny}
+\setbeamertemplate{theorems}[ams style] 
+
+\usepackage{tikz}
+\usetikzlibrary{mindmap,shadows,tikzmark,positioning,arrows.meta}
+
+% Information boxes
+\newcommand*{\info}[4][16.3]{%
+  \node [ annotation, #3, scale=0.65, text width = #1em,
+          inner sep = 2mm ] at (#2) {%
+  \list{$\bullet$}{\topsep=0pt\itemsep=0pt\parsep=0pt
+    \parskip=0pt\labelwidth=8pt\leftmargin=8pt
+    \itemindent=0pt\labelsep=2pt}%
+    #4
+  \endlist
+  };
+}
+
+\tikzset{%
+  >={Latex[width=2mm,length=2mm]},
+  % Specifications for style of nodes:
+            base/.style = {rectangle, rounded corners, draw=black,
+                           minimum width=4cm, minimum height=1cm,
+                           text centered, font=\sffamily},
+  activityStarts/.style = {base, fill=blue!30},
+       startstop/.style = {base, fill=red!30},
+    activityRuns/.style = {base, fill=green!30},
+         process/.style = {base, minimum width=2.5cm, fill=orange!15,
+                           font=\ttfamily},
+}
+\renewcommand\textbullet{\ensuremath{\bullet}}
+\newcommand\scalemath[2]{\scalebox{#1}{\mbox{\ensuremath{\displaystyle #2}}}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+%%% Bibliography
+\usepackage[citestyle=numeric,style=numeric,backend=biber,doi=false,isbn=false,url=false]{biblatex}
+\addbibresource{references.bib}
+
+%%% Suppress biblatex annoying warning
+\usepackage{silence}
+\WarningFilter{biblatex}{Patching footnotes failed}
+
+%%% new theorems %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\theoremstyle{definition}
+\newtheorem{mydef}{Definition}
+
+\theoremstyle{plain}
+\newtheorem{mylemma}{Lemma}[section]
+\newtheorem{mytheorem}{Theorem}[section]
+\newtheorem{myproposition}{Proposition}[section]
+\newtheorem{myproblem}{Problem}[section]
+\newtheorem{mydefinition}{Definition}[section]
+\newtheorem{myassumption}{Assumption}[section]
+
+\theoremstyle{remark}
+\newtheorem{myremark}{Remark}[section]
+
+\newcounter{saveenumi}
+\newcommand{\seti}{\setcounter{saveenumi}{\value{enumi}}}
+\newcommand{\conti}{\setcounter{enumi}{\value{saveenumi}}}
+
+\resetcounteronoverlays{saveenumi}
+
+\title{Control de Sistemas}
+\subtitle{\small Clase 4: Estabilidad de Sistemas Retroalimentados}
+\author{Gerardo Becerra, Ph.D.}
+\institute{Pontificia Universidad Javeriana\\ Departamento de Electrónica}
+\date{Febrero 18, 2020}
+
+\begin{document}
+
+\frame{\titlepage}	
+
+% \frame{\tableofcontents}
+
+\begin{frame}[<+->]\frametitle{Introducción}
+\begin{itemize}
+	\item Estabilidad $\rightarrow$ muy importante para el diseño y análisis de sistemas retroalimentados.
+	\item Sistema de lazo cerrado inestable $\rightarrow$ en general no es muy útil.
+	\item Sistemas inestables $\rightarrow$ pueden hacerse estables usando retroalimentación.
+	\item Sistemas estables $\rightarrow$ pueden mejorar su desempeño usando retroalimentación.
+	\item Tipos de estabilidad:
+	\begin{itemize}
+		\item Estabilidad externa: asociada con las entradas.
+		\item Estabilidad interna: asociada al estado interno.
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+\section{Estabilidad Externa}
+\begin{frame}[<+->]\frametitle{Estabilidad Externa}
+\begin{itemize}
+ 	\item Sistema SISO (single input, single output), lineal e invariante en el tiempo, con respuesta impulso $g(t)$:
+	\begin{equation*}
+		y(t) = \int_0^t g(t-\tau) u(\tau) d\tau
+	\end{equation*}
+	\item Se asume sistema causal y relajado en $t=0$.
+	\item Entrada $u(t)$ acotada (bounded): no crece indefinidamente. Existe una constante $u_m$ tal que $\norm{u(t)} \leq u_m \leq \infty$ para todo $t >= 0$.
+  \item \textbf{Estabilidad BIBO} (bounded input - bounded output): toda entrada acotada produce una salida acotada.
+ \end{itemize} 
+\end{frame}
+
+\begin{frame}[<-+>]\frametitle{Estabilidad Externa}
+  \begin{theorem}\label{th:externalStability1}
+  Un sistema es BIBO estable si y sólo si $g(t)$ es absolutamente integrable en el intervalo $[0,\infty)$ para alguna constante $M$:
+  \begin{equation*}
+  	\int_0^\infty |g(t)| dt \leq M \leq \infty
+  \end{equation*}
+  \end{theorem}
+\end{frame}
+
+\begin{frame}[<-+>]\frametitle{Estabilidad Externa}
+	Para sistemas definidos en términos de función de transferencia:
+  \begin{theorem}\label{th:externalStability2}
+    Un sistema con función de transferencia racional propia $G(s)$ es BIBO estable si y sólo si todos los polos de $G(s)$ tienen parte real negativa, o se encuentran en el lado izquierdo del semiplano complejo, sin incluir el eje imaginario.
+  \end{theorem}
+\end{frame}
+
+\begin{frame}[<+->][fragile]\frametitle{Estabilidad Externa: Ejemplo}
+\textbf{Considere el sistema dado por la ecuación diferencial $\ddot{y} + \dot{y} - 2y = \dot{u} - u$. Verifique si el sistema es BIBO estable.}\\
+\small \pause
+\begin{columns}
+\begin{column}{0.5\textwidth}
+Aplicando la transformada de Laplace, se obtiene la función de transferencia:
+\begin{equation*}
+	G(s) = \frac{Y(s)}{U(s)} = \frac{s-1}{s^2+s-2}
+\end{equation*}
+\pause
+\end{column}	
+\begin{column}{0.5\textwidth}
+Usando Matlab para graficar la respuesta impulso:
+\begin{verbatim}
+>> G = tf([1 -1],[1 1 -2])
+impulse(G)
+G =
+     s - 1
+  -----------
+  s^2 + s - 2
+ 
+Continuous-time transfer function.
+\end{verbatim}
+\end{column}	
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->][fragile]\frametitle{Estabilidad Externa: Ejemplo}
+\centering
+\includegraphics[width=9cm]{images/impulseResponse.eps}\\
+\small \pause
+Teorema \ref{th:externalStability1}: $g(t)$ absolutamente integrable $\Rightarrow$ BIBO estable.
+\end{frame}
+
+\begin{frame}[<+->][fragile]\frametitle{Estabilidad Externa: Ejemplo}
+Calculando los polos de la función de transferencia:
+\begin{verbatim}
+>> pole(G)
+
+ans =
+
+    -2
+     1
+\end{verbatim}
+\pause
+\textcolor{red}{No todos los polos tienen parte real negativa! Cuál es el problema?}
+\end{frame}
+
+\begin{frame}[<+->][fragile]\frametitle{Estabilidad Externa: Ejemplo}
+\vspace*{5mm}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+Cancelación polo - cero
+\begin{equation*}
+	G(s) = \frac{Y(s)}{U(s)} = \frac{\cancel{s-1}}{(s+2)\cancel{(s-1)}} = \frac{1}{s+2}
+\end{equation*}
+\pause
+Entonces, el sistema satisface las condiciones del teorema \ref{th:externalStability2} $\Rightarrow$ es BIBO estable.
+\end{column}	
+\begin{column}{0.5\textwidth}
+Aplicando una entrada paso:
+\centering
+\includegraphics[width=7cm]{images/stepResponse.eps}
+Respuesta acotada ante una entrada acotada.
+\end{column}	
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Criterio de Estabilidad de Routh-Hurwitz}
+\begin{itemize}
+	\item A. Hurwitz [1895] y E. J. Routh [1892]: método para investigar la estabilidad de un sistema lineal.
+	\item Provee una respuesta a la pregunta por la estabilidad considerando el polinomio característico del sistema:
+	\begin{equation*}
+		q(s) = a_n s^n + a_{n-1} s^{n-1} + \dots + a_1 s + a_0 = 0
+	\end{equation*}
+	sin necesidad de calcular las raíces.
+	\item Recientemente no es tan usado gracias a los métodos numéricos para calcular las raíces.
+	\item Factorizando $q(s)$ se obtiene:
+	\begin{equation*}
+		a_n (s-r_1) (s-r_1) \dots (s-r_n) = 0
+	\end{equation*}
+	donde $r_i$ corresponde a la $i$-esima raíz de $q(s)$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Criterio de Estabilidad de Routh-Hurwitz}
+\begin{itemize}
+	\item Multiplicando los factores se obtiene:
+	\begin{align*}
+		q(s) = a_n& s^n - a_n(r_1 + r_2 + \dots + r_n)s^{n-1} + a_n(r_1r_2 + r_2r_3 + \dots)s^{n-2}\\
+		&- a_n(r_1r_2r_3 + r_1r_2r_4 + \dots)s^{n-3} + \dots - a_n(-1)^n(r_1r_2r_3 \dots r_n) = 0
+	\end{align*}
+	\item Entonces se obtiene la forma general:
+	\begin{align*}
+		q(s) = a_n& s^n - a_n(\text{suma de todas las raíces})s^{n-1}\\
+		&+ a_n(\text{suma de productos de combinaciones de 2 raíces})s^{n-2}\\
+		&- a_n(\text{suma de productos de combinaciones de 3 raíces})s^{n-3} + \dots \\
+		&- a_n(-1)^n(\text{productos de todas las raíces}) = 0
+	\end{align*}
+	\item Si las raíces están en el semiplano izquierdo, los coeficientes tienen el mismo signo y son diferentes a cero (condición necesaria pero no suficiente).
+\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Criterio de Estabilidad de Routh-Hurwitz}
+\begin{itemize}
+	\item Criterio de Routh-Hurwitz: condición necesaria y suficiente para estabilidad de sistemas lineales.
+	\item A partir del polinomio característico $a_n s^n + a_{n-1} s^{n-1} + \dots + a_1 s + a_0 = 0$, se define el arreglo de Routh como:
+	\vspace{-5mm}
+	\begin{columns}
+	\begin{column}{0.5\textwidth}
+	\begin{tabular}{c|cccc}
+		$s^n$     & $a_n$     & $a_{n-2}$ & $a_{n-4}$ & \dots\\
+		$s^{n-1}$ & $a_{n-1}$ & $a_{n-3}$ & $a_{n-5}$ & \dots\\
+		$s^{n-2}$ & $b_{n-1}$ & $b_{n-3}$ & $b_{n-5}$ & \dots\\
+		$s^{n-3}$ & $c_{n-1}$ & $c_{n-3}$ & $c_{n-5}$ & \dots\\
+		$\vdots$ & $\vdots$ & $\vdots$ & $\vdots$ & $\ddots$\\
+		$s^0$ & $h_{n-1}$ & & & 
+	\end{tabular}
+	\end{column}
+	\begin{column}{0.5\textwidth}
+	\begin{align*}
+		b_{n-1} &= \frac{-1}{a_{n-1}}
+		\begin{vmatrix}
+			a_n     & a_{n-2}\\
+			a_{n-1} & a_{n-3}
+		\end{vmatrix},\\
+		b_{n-3} &= \frac{-1}{a_{n-1}}
+		\begin{vmatrix}
+			a_n     & a_{n-4}\\
+			a_{n-1} & a_{n-5}
+		\end{vmatrix}, \dots\\
+		c_{n-1} &= \frac{-1}{b_{n-1}}
+		\begin{vmatrix}
+			a_{n-1} & a_{n-3}\\
+			b_{n-1} & b_{n-3}
+		\end{vmatrix}, \dots\\
+	\end{align*}
+	\end{column}
+	\end{columns}
+	\vspace{-5mm}
+	\item Número de raíces de $q(s)$ con parte real positiva = número de cambios de signo en la primera columna del arreglo de Routh.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Criterio de Estabilidad de Routh-Hurwitz - Caso 1}
+\textbf{Caso 1: Ningún elemento de la primera columna es cero.}
+\begin{itemize}
+	\item Polinomio característico: $q(s) = a_2 s^2 + a_1 s + a_0 = 0$.
+	\item Arreglo de Routh:\\
+	\centering	
+	\begin{columns}
+	\begin{column}{0.2\textwidth}
+	\begin{tabular}{c|cc}
+		$s^2$ & $a_2$ & $a_0$\\
+		$s^1$ & $a_1$ & 0\\
+		$s^0$ & $b_1$ & 0
+	\end{tabular}
+	\end{column}	
+	\begin{column}{0.2\textwidth}
+	\begin{equation*}
+		b_1 = \frac{-1}{a_1}
+		\begin{vmatrix}
+			a_2 & a_0\\
+			a_1 & a_0
+		\end{vmatrix} = a_0
+	\end{equation*}
+	\end{column}	
+	\end{columns}
+	\item Entonces, el sistema es estable si todos los coeficientes son positivos o todos son negativos.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Criterio de Estabilidad de Routh-Hurwitz - Caso 2}
+\textbf{Caso 2: Existe un cero en la primera columna, pero otros elementos de esa fila son diferentes a cero.}
+\begin{itemize}
+	\item Polinomio característico: $q(s) = s^5 + 2s^4 + 2s^3 + 4s^2 + 11s + 10 = 0$.
+	\item Arreglo de Routh:\\
+	\centering	
+	\begin{columns}
+	\begin{column}{0.2\textwidth}
+	\begin{tabular}{c|ccc}
+		$s^5$ & 1 & 2 & 11\\
+		$s^4$ & 2 & 4 & 10\\
+		$s^3$ & $\epsilon$ & 6 & 0\\
+		$s^2$ & $c_1$ & 10 & 0\\
+		$s^1$ & $d_1$ & 0 & 0\\
+		$s^0$ & 10 & 0 & 0
+	\end{tabular}
+	\end{column}	
+	\begin{column}{0.2\textwidth}
+	\begin{align*}
+		c_1 &= \frac{4\epsilon - 12}{\epsilon}\\
+		d_1 &= \frac{6c_1 - 10\epsilon}{c_1}
+	\end{align*}
+	\end{column}	
+	\end{columns}
+	\item Cuando $\epsilon \rightarrow 0^+$, se obtiene $c_1 < 0$ y $d_1 > 0$.
+	\item Entonces, hay dos cambios de signo en la primera columna.
+	\item Por lo tanto, el sistema es inestable con dos raíces en el semiplano derecho.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Criterio de Estabilidad de Routh-Hurwitz - Caso 3}
+\textbf{Caso 3: Todos los coeficientes en una fila son cero.}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+	\begin{itemize}
+		\item Polinomio característico: $q(s) = s^5 + 2s^4 + 24s^3 + 48s^2 - 25s - 50 = 0$.
+		\item Arreglo de Routh:\\
+		\centering	
+		\begin{tabular}{c|ccc}
+			$s^5$ & 1 & 24 & -25\\
+			$s^4$ & 2 & 48 & -50\\
+			$s^3$ & 0 & 0  & 
+		\end{tabular}
+		\item Se forma el polinomio auxiliar usando la fila anterior: $P(s) = 2s^4 + 48s^2 - 50$.
+	\end{itemize}	
+\end{column}	
+\begin{column}{0.5\textwidth}
+	\begin{itemize}
+		\item La fila se reemplaza por los coeficientes de $dP(s)/ds = 8s^3 + 96s$:
+		\centering	
+		\begin{tabular}{c|ccc}
+			$s^5$ & 1  &  24 & -25\\
+			$s^4$ & 2  &  48 & -50\\
+			$s^0$ & 8  &  96 & \\
+			$s^2$ & 24 & -50 & \\
+			$s^1$ & 112.7 & 0 & \\
+			$s^0$ & -50 &  & 
+		\end{tabular}
+		\item Hay un cambio de signo $\rightarrow$ una raíz con parte real positiva $\rightarrow$ sistema inestable.
+	\end{itemize}
+\end{column}	
+\end{columns}
+\end{frame}
+
+\section{Estabilidad Interna}
+\begin{frame}[<+->]\frametitle{Estabilidad Interna}
+\begin{itemize}
+  \item Se estudia para el caso de respuesta a entrada cero: $\dot{x}(t) = \mathbf{A}x(t)$
+  \item Se desea conocer si el sistema es internamente estable para una condición inicial $x_0$.
+  \item Para el siguiente sistema, qué podría decirse sobre la estabilidad en cada caso?
+\end{itemize}
+	\centering
+	\includegraphics[width=8cm]{images/internalStability.eps}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Estabilidad Interna}
+\vspace*{5mm}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+Se presentan dos criterios de estabilidad:
+\begin{itemize}
+  \item Estable en el sentido de Lyapunov: toda condición inicial limitada genera una respuesta limitada del estado.
+  \item Asintóticamente estable: toda condición inicial limitada genera una respuesta del estado limitada que tiende a cero cuando el tiempo tiende a infinito. 
+\end{itemize}
+\end{column}	
+\begin{column}{0.5\textwidth}
+\centering
+\includegraphics[width=7cm]{images/stabilityLyapunov.png}
+\end{column}	
+\end{columns}
+\end{frame}
+
+\begin{frame}[<-+>]\frametitle{Estabilidad Interna}
+\begin{theorem}\label{th:internalStability1}
+\begin{itemize}
+  \item El sistema es asintóticamente estable si y sólo si todos los valores propios de $\mathbf{A}$ tienen parte real negativa.
+  \item El sistema es marginalmente estable si y sólo si todos los valores propios de $\mathbf{A}$ tienen parte real cero o negativa, y aquellos con parte real cero son raices simples del polinomio característico de $\mathbf{A}$.
+\end{itemize}
+\end{theorem}
+\end{frame}
+
+\begin{frame}[<+->][fragile]\frametitle{Estabilidad Interna - Ejemplo}
+El sistema definido por la ecuación diferencial $\ddot{y} + \dot{y} - 2y = \dot{u} - u$ puede escribirse en variables de estado como:
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\scriptsize
+\begin{verbatim}
+>> [A,B,C,D] = tf2ss([1 -1],[1 1 -2])
+A =
+    -1     2
+     1     0
+B =
+     1
+     0
+C =
+     1    -1
+D =
+     0
+\end{verbatim} 
+\end{column}	
+\begin{column}{0.5\textwidth}
+\begin{align*}
+\begin{bmatrix}
+	\dot{x}_1 \\ \dot{x}_2
+\end{bmatrix} = 
+\begin{bmatrix}
+	-1 & 2 \\ 1 & 0
+\end{bmatrix}
+\begin{bmatrix}
+	x_1 \\ x_2
+\end{bmatrix} + 
+\begin{bmatrix}
+	1 \\ 0
+\end{bmatrix}u\\
+y =
+\begin{bmatrix}
+	1 & -1
+\end{bmatrix}
+\begin{bmatrix}
+	x_1 \\ x_2
+\end{bmatrix} + 
+\begin{bmatrix}
+	0
+\end{bmatrix}u\\
+\end{align*}
+\vspace*{-1.5cm}
+\small
+\begin{verbatim}
+>> eig(A)
+ans =
+    -2
+     1	
+\end{verbatim}
+\textbf{Teorema \ref{th:internalStability1} $\rightarrow$ internamente inestable!}
+\end{column}	
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->][fragile]\frametitle{Estabilidad Interna - Ejemplo}
+\vspace*{5mm}
+\begin{columns}
+\begin{column}{0.4\textwidth}
+\small
+\begin{verbatim}
+sys = ss(A,B,C,D);
+[y,t,x] = initial(sys,[1,0]);
+\end{verbatim}
+\textcolor{red}{Estados inestables, pero salida estable!} 
+\end{column}	
+\begin{column}{0.6\textwidth}
+\centering
+\includegraphics[width=9cm]{images/initialCondResponse.eps}
+\end{column}	
+\end{columns}
+\end{frame}
+
+\begin{frame}[<-+>]\frametitle{Relación entre los Diferentes Tipos de Estabilidad}
+\centering
+\vspace*{5mm}
+\includegraphics[width=8.5cm]{images/stabilityTypes.eps}
+\end{frame}
+
+\begin{frame}\frametitle{Taller}
+\begin{enumerate}
+  \conti
+  \item El sistema mostrado en la figura representa un proceso que controlador por un controlador proporcional-derivativo (PD).
+  \begin{itemize}
+  	\item Usando el criterio de Routh-Hurwitz, determine el rango de $K_P$ y $K_D$ para garantizar estabilidad del sistema en lazo cerrado.
+  	\item Asigne valores a $K_P$ y $K_D$ dentro del rango encontrado. Verifique para éste caso las propiedades de estabilidad interna y externa usando los teoremas \ref{th:externalStability2} y \ref{th:internalStability1}.
+  \end{itemize}
+  \seti
+\end{enumerate}
+\begin{center}
+  \includegraphics[width=10cm]{images/stability_PD.eps}
+\end{center}
+\end{frame}
+
+\begin{frame}\frametitle{Taller}
+\begin{enumerate}
+  \conti
+  \item Considere el sistema representado en variables de estado con
+  \begin{align*}
+  	A &= 
+  	\begin{bmatrix}
+  		0  &  1 &  0\\
+  		0  &  0 &  1\\
+  		-k & -k & -k
+  	\end{bmatrix},
+  	B = 
+  	\begin{bmatrix}
+  		0 \\ 0 \\ 1
+  	\end{bmatrix}\\
+  	C &=
+  	\begin{bmatrix}
+  		1 & 0 & 0
+  	\end{bmatrix}, 
+  	D =
+  	\begin{bmatrix}
+  		0
+  	\end{bmatrix}.
+  \end{align*}
+  \begin{itemize}
+  	\item Encuentre la función de transferencia del sistema.
+  	\item Para qué valores de $k$ el sistema es estable?
+  \end{itemize}
+  \seti
+\end{enumerate}
+\end{frame}
+
+\begin{frame}\frametitle{Taller}
+\begin{enumerate}
+	\conti
+ 	\item Considere la ecuación característica:
+ 	\begin{equation*}
+ 		s^4 + 2s^3 + (4+K)s^2 + 9s + 25 = 0
+ 	\end{equation*}
+ 	Usando el criterio de Routh-Hurwitz, determine el rango de $K$ para estabilidad.
+\end{enumerate} 
+
+
+\end{frame}
+
+
+\end{document}

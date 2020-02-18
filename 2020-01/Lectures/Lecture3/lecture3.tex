@@ -1,0 +1,740 @@
+\documentclass[aspectratio=169,handout]{beamer}
+% \usepackage[utf8]{inputenc}
+\usetheme{metropolis}
+\usecolortheme{orchid}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{multirow}
+\usepackage[ruled]{algorithm2e}
+\usepackage{mathtools}
+\usepackage{caption}
+\usepackage{epstopdf}
+\usepackage{hyperref}
+\setbeamerfont{footnote}{size=\tiny}
+
+\usepackage{tikz}
+\usetikzlibrary{mindmap,shadows,tikzmark,positioning,arrows.meta}
+
+% Information boxes
+\newcommand*{\info}[4][16.3]{%
+  \node [ annotation, #3, scale=0.65, text width = #1em,
+          inner sep = 2mm ] at (#2) {%
+  \list{$\bullet$}{\topsep=0pt\itemsep=0pt\parsep=0pt
+    \parskip=0pt\labelwidth=8pt\leftmargin=8pt
+    \itemindent=0pt\labelsep=2pt}%
+    #4
+  \endlist
+  };
+}
+
+\tikzset{%
+  >={Latex[width=2mm,length=2mm]},
+  % Specifications for style of nodes:
+            base/.style = {rectangle, rounded corners, draw=black,
+                           minimum width=4cm, minimum height=1cm,
+                           text centered, font=\sffamily},
+  activityStarts/.style = {base, fill=blue!30},
+       startstop/.style = {base, fill=red!30},
+    activityRuns/.style = {base, fill=green!30},
+         process/.style = {base, minimum width=2.5cm, fill=orange!15,
+                           font=\ttfamily},
+}
+\renewcommand\textbullet{\ensuremath{\bullet}}
+\newcommand\scalemath[2]{\scalebox{#1}{\mbox{\ensuremath{\displaystyle #2}}}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+%%% Bibliography
+\usepackage[citestyle=numeric,style=numeric,backend=biber,doi=false,isbn=false,url=false]{biblatex}
+\addbibresource{references.bib}
+
+%%% Suppress biblatex annoying warning
+\usepackage{silence}
+\WarningFilter{biblatex}{Patching footnotes failed}
+
+%%% new theorems %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\theoremstyle{definition}
+\newtheorem{mydef}{Definition}
+
+\theoremstyle{plain}
+\newtheorem{mylemma}{Lemma}[section]
+\newtheorem{mytheorem}{Theorem}[section]
+\newtheorem{myproposition}{Proposition}[section]
+\newtheorem{myproblem}{Problem}[section]
+\newtheorem{mydefinition}{Definition}[section]
+\newtheorem{myassumption}{Assumption}[section]
+
+\theoremstyle{remark}
+\newtheorem{myremark}{Remark}[section]
+
+\newcounter{saveenumi}
+\newcommand{\seti}{\setcounter{saveenumi}{\value{enumi}}}
+\newcommand{\conti}{\setcounter{enumi}{\value{saveenumi}}}
+
+\resetcounteronoverlays{saveenumi}
+
+\title{Control de Sistemas}
+\subtitle{\small Clase 3: Diagramas de Bloques de Sistemas en Lazo Cerrado}
+\author{Gerardo Becerra, Ph.D.}
+\institute{Pontificia Universidad Javeriana\\ Departamento de Electrónica}
+\date{Febrero 11, 2020}
+
+\begin{document}
+
+\frame{\titlepage}	
+
+% \frame{\tableofcontents}
+
+\begin{frame}[<+->]\frametitle{Introducción}
+\begin{itemize}
+	\item Sistema: interconexión de subsistemas.
+	\item Subsistema: representado por una función de transferencia.
+	\item Objetivo: obtener la función de transferencia de un sistema formado por varios subsistemas.
+	\item Representación gráfica de subsistemas:
+	\begin{itemize}
+		\item Diagramas de bloques.
+		\item Diagramas de flujo.
+	\end{itemize}
+	\item Métodos para simplificar los diagramas:
+	\begin{itemize}
+		\item Diagramas de bloques: álgebra de bloques.
+		\item Diagramas de flujo: regla de Mason.
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+\section{Diagramas de Bloques}
+\begin{frame}[<+->]\frametitle{Diagramas de Bloques}
+\textbf{Componentes:}\\
+\vspace*{5mm}
+\centering
+\includegraphics[width=10cm]{images/blockDiagramElements.eps}
+\begin{itemize}
+	\item Aplican para sistemas lineales e invariantes en el tiempo (LTI).
+	\item Pueden organizarse en múltiples configuraciones / topologías.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Configuración en Cascada}
+\begin{itemize}
+	\item La salida de un subsistema se alimenta al siguiente subsistema.
+	\begin{center}
+		\includegraphics[width=10cm]{images/cascadeConfig1.eps}
+	\end{center}
+	\item La función de transferencia equivalente es el producto de las funciones de transferencia en cascada.
+	\begin{center}
+		\includegraphics[width=5cm]{images/cascadeConfig2.eps}
+	\end{center}
+	\item Éste resultado aplica bajo la suposición de que no existe \textbf{efecto de carga}: la salida de un subsistema se mantiene igual aunque el siguiente bloque se encuentre conectado o no.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Efecto de Carga: Circuitos RC en Cascada}
+\begin{columns}
+	\begin{column}{0.5\textwidth}
+		\centering
+		\includegraphics[width=3.5cm]{images/loadEffect1.eps}
+	\end{column}
+	\pause
+	\begin{column}{0.5\textwidth}
+		\centering
+		\includegraphics[width=6cm]{images/loadEffect2.eps}
+	\end{column}	
+\end{columns}
+	\small	
+	El efecto se previene usando un amplificador de ganancia $K$ con alta impedancia de entrada y baja impedancia de salida.
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Configuración Paralela}
+	\begin{itemize}
+		\item Varios subsistemas se alimentan con una misma entrada.
+		\item Las salidas de los subsistemas se suman.
+		\begin{center}
+			\includegraphics[width=10cm]{images/parallelConfig1.eps}
+		\end{center}
+		\item La función de transferencia equivalente es la suma de las funciones de transferencia en paralelo.
+		\begin{center}
+			\includegraphics[width=6cm]{images/parallelConfig2.eps}
+		\end{center}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Configuración en Lazo Retroalimentado}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+		\begin{itemize}
+			\item Configuración fundamental en los sistemas de control.
+			\item La salida se retroalimenta para compararla con la referencia y generar una señal de error.
+		\end{itemize}
+		\begin{center}
+			\includegraphics[width=6cm]{images/feedbackConfig1.eps}
+		\end{center}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+		\begin{itemize}
+			\item La función de transferencia equivalente es:
+			\begin{center}
+				\includegraphics[width=4cm]{images/feedbackConfig2.eps}
+			\end{center}
+		\item El signo depende del tipo de retroalimentación (positiva o negativa).
+		\end{itemize}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Movimiento de Bloques para Crear Formas Familiares}
+	\begin{itemize}
+		\item Formas familiares (cascada, paralelo, retroalimentación) no siempre son aparentes en el diagrama de bloques.
+		\item Movimiento de bloques a través de puntos de unión o sumadores: permite obtener formas familiares.
+	\end{itemize}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\centering
+			\includegraphics[width=7cm]{images/blockMovement1.eps}
+			\small Movimiento hacia atrás en un sumador.
+		\end{column}	
+		\pause
+		\begin{column}{0.5\textwidth}
+			\centering
+			\includegraphics[width=7cm]{images/blockMovement2.eps}
+			\small Movimiento hacia adelante en un sumador.
+		\end{column}	
+	\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Movimiento de Bloques para Crear Formas Familiares}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\centering
+			\includegraphics[width=7cm]{images/blockMovement3.eps}
+			\small Movimiento hacia atrás en un punto de unión.
+		\end{column}	
+		\pause
+		\begin{column}{0.5\textwidth}
+			\centering
+			\includegraphics[width=7cm]{images/blockMovement4.eps}
+			\small Movimiento hacia adelante en un punto de unión.
+		\end{column}	
+	\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Ejemplo 1: Reducción de Bloques usando Formas Familiares}
+\textbf{Reducir el diagrama de bloques a una sola función de transferencia.}\\
+\centering
+\vspace*{5mm}
+\includegraphics[width=9cm]{images/example1_familiarForms.eps}	
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Ejemplo 1: Reducción de Bloques usando Formas Familiares}
+1. Colapsar todos los sumadores en uno sólo:\\
+\centering
+\vspace*{5mm}
+\includegraphics[width=8cm]{images/example1_familiarForms1.eps}	
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Ejemplo 1: Reducción de Bloques usando Formas Familiares}
+2. Encontrar el equivalente paralelo:\\
+\centering
+\vspace*{5mm}
+\includegraphics[width=8cm]{images/example1_familiarForms2.eps}	
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Ejemplo 1: Reducción de Bloques usando Formas Familiares}
+3. Calcular la función de transferencia total usando la fórmula de lazo retroalimentado:\\
+\centering
+\vspace*{5mm}
+\includegraphics[width=8cm]{images/example1_familiarForms3.eps}	
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Ejemplo 2: Reducción de Bloques usando Movimiento de Bloques}
+\textbf{Reducir el diagrama de bloques a una sola función de transferencia.}\\
+\centering
+\vspace*{5mm}
+\includegraphics[width=11cm]{images/example2_blockMovement.eps}	
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Ejemplo 2: Reducción de Bloques usando Movimiento de Bloques}
+\centering
+\vspace*{5mm}
+\includegraphics[width=11cm]{images/example2_blockMovement1.eps}	
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Ejemplo 2: Reducción de Bloques usando Movimiento de Bloques}
+\centering
+\vspace*{5mm}
+\includegraphics[width=11cm]{images/example2_blockMovement2.eps}	
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Ejemplo 2: Reducción de Bloques usando Movimiento de Bloques}
+\centering
+\vspace*{5mm}
+\includegraphics[width=11cm]{images/example2_blockMovement3.eps}	
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Ejemplo 2: Reducción de Bloques usando Movimiento de Bloques}
+\centering
+\vspace*{5mm}
+\includegraphics[width=11cm]{images/example2_blockMovement4.eps}	
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Ejemplo 2: Reducción de Bloques usando Movimiento de Bloques}
+\centering
+\vspace*{5mm}
+\includegraphics[width=11cm]{images/example2_blockMovement5.eps}	
+\end{frame}
+
+\section{Diagramas de Flujo}
+\begin{frame}[<+->]\frametitle{Diagramas de Flujo}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\begin{itemize}
+	\item Alternativa a los diagramas de flujo.
+	\item Elementos:
+	\begin{itemize}
+		\item Ramas: representan sistemas.
+		\item Nodos: representan señales.
+	\end{itemize}
+	\item Las ramas tienen una flecha. Representan la dirección de flujo de la señal a través del sistema.
+	\item Cada señal es igual a la suma de señales que entran al nodo.
+\end{itemize}
+\end{column}	
+\begin{column}{0.5\textwidth}
+\centering
+\vspace*{5mm}
+\includegraphics[width=7cm]{images/flowDiagrams.eps}	
+\end{column}	
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Ejemplo 3: Convertir Diagramas de Bloques en Diagramas de Flujo}
+\textbf{Convierta los diagramas de bloques de las formas familiares a diagramsa de flujo.}\\
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Ejemplo 4: Convertir Diagramas de Bloques en Diagramas de Flujo}
+\textbf{Convierta el siguiente diagrama de bloques en diagrama de flujo.}\\
+\centering
+\vspace*{5mm}
+\includegraphics[width=11cm]{images/example2_blockMovement.eps}	
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Regla de Mason}
+\begin{itemize}
+	\item Aplicación de una fórmula obtenida por S.J. Mason (1953).
+	\item Puede ser más fácil obtener la función de transferencia que usando reducción de diagramas de bloques.
+	\item Definición de elementos del diagrama:
+	\begin{itemize}
+		\item Ganancia de lazo: Producto de ganancias de ramas que se recorren iniciando en un nodo y finalizando en el mismo nodo siguiendo la dirección de flujo, sin pasar por cualquier otro nodo más de una vez.
+		\item Ganancia de trayectoria: Producto de ganancias de ramas que se recorren desde el nodo de entrada hasta el nodo de salida siguiendo la dirección de flujo.
+		\item Lazos que no se tocan: Lazos que no tienen nodos en común.
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Regla de Mason}
+\begin{theorem}
+\footnotesize
+La función de transferencia $C(s)/R(s)$	de un sistema representado por un diagrama de flujo es:
+\begin{equation*}
+	G(s) = \frac{C(s)}{R(s)} = \frac{\sum_k T_k \Delta_k}{\Delta}		
+\end{equation*}	
+Donde:
+\begin{itemize}
+	\item $k$: Número de trayectorias directas.
+	\item $T_k$: Ganancia de la $k$-ésima trayectoria directa.
+	\item $\Delta$ = 1 - $\sum$ ganancias de lazo individuales + $\sum$ ganancias de 2 lazos que no se tocan - $\sum$ ganancias de 3 lazos que no se tocan + $\sum$ ganancias de 4 lazos que no se tocan - ...
+	\item $\Delta_k$ = 1 - $\sum$ ganancias de lazo en $\Delta$ que tocan la $k$-ésima trayectoria. ($\Delta_k$ se forma eliminando de $\Delta$ las ganancias de lazo que tocan la $k$-ésima trayectoria).
+\end{itemize}
+\end{theorem}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Taller}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\centering
+\vspace*{5mm} \includegraphics[width=8cm]{images/exercise1.eps}
+\end{column}
+\begin{column}{0.5\textwidth}
+Para el diagrama de bloques de la figura:\\
+\begin{itemize}
+	\item Obtenga la función de transferencia usando reducción de bloques.
+	\item Obtenga el diagrama de flujo equivalente.
+	\item Obtenta la función de transferencia usando la regla de Mason.
+	\item Verifique los resultados y concluya.
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+% \begin{frame}[<+->]\frametitle{Modelamiento de Sistemas - Procedimiento}
+% \begin{enumerate}
+%   \item Definir el sistema y sus componentes.
+%   \item Formular las relaciones básicas entre variables y suposiciones usando los principios fundamentales.
+%   \item Obtener las ecuaciones diferenciales que representan el modelo matemático.
+%   \item Solucionar las ecuaciones para las variables deseadas.
+%   \item Examinar las soluciones y las suposiciones.
+%   \item En caso necesario, analizar o diseñar el modelo nuevamente.
+% \end{enumerate}
+% \end{frame}
+
+% \begin{frame}[<+->]\frametitle{Ecuaciones Diferenciales de Sistemas Físicos}
+%   \begin{itemize}
+%     \item Describen el comportamiento dinámico de los sistemas.
+%     \item Se obtienen utilizando los principios físicos de los procesos.
+%     \item Se utilizan leyes de interconexión para definir la interacción entre elementos/subsistemas.
+%     \item Ecuaciones diferenciales lineales $\rightarrow$ funciones de transferencia.
+%     \item Ecuaciones diferenciales no lineales $\rightarrow$ linealización.
+%   \end{itemize}
+% \end{frame}
+
+% \begin{frame}[<+->]\frametitle{Ecuaciones Diferenciales de Sistemas Físicos}
+%   \textbf{Variables y Parámetros:}
+%   \begin{itemize}
+%     \item Variables pasantes: $F$ (fuerza), $T$ (torque), $i$ (corriente), $Q$ (flujo volumétrico), $q$ (flujo de calor).
+%     \item Variables transversales: $v$ (velocidad traslacional), $\omega$ (velocidad angular), $V$ (voltaje), $P$ (presión), $\mathcal{T}$ (temperatura).
+%     \item Almacenamiento inductivo: $L$ (inductancia), $1/k$ (rigidez traslacional o rotacional inversa), $I$ (inertancia).
+%     \item Almacenamiento capacitivo: $C$ (capacitancia), $M$ (masa), $J$ (momento de inercia), $C_f$ (capacitancia de fluido), $C_t$ (capacitancia térmica).
+%     \item Disipación de energía: $R$ (resistencia), $b$ (fricción viscosa), $R_f$ (resistencia de fluido), $R_f$ (resistencia térmica).
+%   \end{itemize}
+% \end{frame}
+
+% \begin{frame}[<+->]\frametitle{Ecuaciones Diferenciales de Sistemas Físicos - Relaciones Fundamentales}
+% \centering
+% \includegraphics[width=14cm]{images/inductance.eps}
+% \end{frame}
+
+% \begin{frame}[<+->]\frametitle{Ecuaciones Diferenciales de Sistemas Físicos - Relaciones Fundamentales}
+% \centering
+% \includegraphics[width=14cm]{images/capacitance.eps}
+% \end{frame}
+
+% \begin{frame}[<+->]\frametitle{Ecuaciones Diferenciales de Sistemas Físicos - Relaciones Fundamentales}
+% \centering
+% \includegraphics[width=14cm]{images/disipation.eps}
+% \end{frame}
+
+% \begin{frame}[<+->]\frametitle{Modelos de Sistemas - Ejemplo 1}
+% \centering
+% \includegraphics[width=9cm]{images/circuit1.eps}
+% \begin{itemize}
+%   \item Obtener las ecuaciones diferenciales que describen el sistema.
+%   \item Obtener la representación en variables de estado.
+%   \item Obtener la función de transferencia.
+% \end{itemize}
+% \end{frame}
+
+% \begin{frame}[<+->]\frametitle{Modelos de Sistemas - Ejemplo 1}
+% \textbf{Ecuaciones diferenciales:}
+% \begin{subequations}\label{eq:diff_eqs}
+% \begin{align}
+%   \frac{di_{L_1}(t)}{dt} &= -\frac{R_1}{L_1}i_{L_1}(t) - \frac{1}{L_1} v_c(t) + \frac{1}{L_1} v_i(t) \\
+%   \frac{di_{L_2}(t)}{dt} &= -\frac{R_2}{L_2}i_{L_2}(t) + \frac{1}{L_2} v_c(t) \\
+%   \frac{dv_c(t)}{dt} &= \frac{1}{C}i_{L_1}(t) - \frac{1}{C}i_{L_2}(t)
+% \end{align}
+% \textbf{Ecuación de salida:}
+% \begin{equation}
+%   V_o(t) = R_2 i_{L_2}(t)
+% \end{equation}
+% \end{subequations}
+% \end{frame}
+
+% \begin{frame}[<+->]\frametitle{Modelos de Sistemas - Ejemplo 1}
+% \textbf{Diagrama de bloques y respuesta paso:}\\
+% \vspace*{3mm}
+% \centering
+% \includegraphics[width=6.5cm]{code/example1_blockdiagram.eps}
+% \pause
+% \hspace*{5mm}
+% \includegraphics[width=6.5cm]{code/example1_stepresponse.eps}
+% \end{frame}
+
+% \begin{frame}[<+->]\frametitle{Modelos de Sistemas - Ejemplo 1}
+% Organizando las ecs. \eqref{eq:diff_eqs} en forma matricial:
+% \begin{subequations}
+% \begin{align}
+%   \begin{bmatrix}
+%    \frac{di_{L_1}(t)}{dt} \\ \frac{di_{L_2}(t)}{dt} \\ \frac{dv_c(t)}{dt} 
+%   \end{bmatrix} &= 
+%   \begin{bmatrix}
+%   -\frac{R_1}{L_1} & 0 & -\frac{1}{L_1} \\
+%   0 & -\frac{R_2}{L_2} &  \frac{1}{L_2} \\
+%   \frac{1}{C} & -\frac{1}{C} & 0
+%   \end{bmatrix}
+%   \begin{bmatrix}
+%    i_{L_1}(t) \\ i_{L_2}(t) \\ v_c(t) 
+%   \end{bmatrix} + 
+%   \begin{bmatrix}
+%     \frac{1}{L_1} \\ 0 \\ 0
+%   \end{bmatrix} v_i(t)\\
+%   v_o(t) &=
+%   \begin{bmatrix}
+%     0 & R_2 & 0
+%   \end{bmatrix}
+%   \begin{bmatrix}
+%    i_{L_1}(t) \\ i_{L_2}(t) \\ v_c(t) 
+%   \end{bmatrix} + 
+%   \begin{bmatrix}
+%     0
+%   \end{bmatrix} v_i(t)
+% \end{align}
+% \end{subequations}
+% se obtiene la \textbf{representación en variables de estado:}
+% \begin{subequations}
+%   \begin{align}
+%     \dot{x}(t) &= \mathbf{A} x(t) + \mathbf{B}u(t)\\
+%     y(t) &= \mathbf{C}x(t) + \mathbf{D}u(t)
+%   \end{align}
+% \end{subequations}
+% \end{frame}
+
+% \begin{frame}[<+->]\frametitle{Modelos de Sistemas}
+%   \begin{align*}
+%     \dot{x}(t) &= \mathbf{A} x(t) + \mathbf{B}u(t)\\
+%     y(t) &= \mathbf{C}x(t) + \mathbf{D}u(t)
+%   \end{align*}
+% \textbf{Estado de un Sistema:}
+% \begin{itemize}
+%   \item Mínima cantidad de información que, junto con la entrada, determinan la respuesta del sistema.
+%   \item Resume la información pasada requerida para determinar el comportamiento futuro.
+%   \item Se definen en sistemas con almacenamiento de energía: no aplican para sistemas instantáneos.
+% \end{itemize}
+% \end{frame}
+
+% \begin{frame}[<+->]\frametitle{Modelos de Sistemas - Ejemplo 1}
+% Aplicando la transformada de Laplace a las Ecs. \eqref{eq:diff_eqs}:
+% \begin{subequations}\label{eq:algebraic_eqs}
+% \begin{align}
+%   s I_{L_1}(s) &= -\frac{R_1}{L_1}I_{L_1}(s) - \frac{1}{L_1} V_c(s) + \frac{1}{L_1} V_i(s) \\
+%   s i_{L_2}(s) &= -\frac{R_2}{L_2}I_{L_2}(s) + \frac{1}{L_2} V_c(s) \\
+%   s V_c(s) &= \frac{1}{C}I_{L_1}(s) - \frac{1}{C}I_{L_2}(s)\\
+%   V_o(s) &= R_2 I_{L_2}(s)
+% \end{align}
+% \end{subequations}
+% \vspace*{-5mm}
+% \begin{itemize}
+%   \item \textbf{Objetivo:} A partir de las Ecs. \eqref{eq:algebraic_eqs}, obtener $V_o(s)/V_i(s)$.
+%   \item \textbf{Procedimiento:} Manipulación Algebráica.
+%   \item \textbf{Alternativa:} Usando la representación en variables de estado.
+% \end{itemize}
+% \end{frame}
+
+% \begin{frame}[<-+>]\frametitle{Modelos de Sistemas - Ejemplo 1}
+%   Usando la fórmula:
+%   \begin{equation}
+%     H(s) = \mathbf{C}(s\mathbf{I}-\mathbf{A})^{-1}\mathbf{B} + \mathbf{D}
+%   \end{equation}
+%   se obtiene la función de transferencia:
+%   \begin{equation}
+%     H(s) = \frac{2\times10^{11}}{s^3 + 5.1\times10^4 s^2 + 5.6\times10^7 s + 2.02\times10^{11}}
+%   \end{equation}
+% \end{frame}
+
+% \section{Tipos de Respuesta Transitoria}
+% \begin{frame}[<-+>]\frametitle{Tipos de Sistemas}
+% \begin{itemize}
+%   \item Sistemas de \textbf{primer orden}:
+%   \begin{equation*}
+%     H(s) = \frac{K}{\tau s + 1}
+%   \end{equation*}
+%   \item Sistemas de \textbf{primer orden con tiempo muerto}:
+%   \begin{equation*}
+%     H(s) = \frac{K e^{-Ls}}{\tau s + 1}
+%   \end{equation*}
+%   \item Sistemas de \textbf{segundo orden}:
+%   \begin{equation*}
+%     H(s) = \frac{\omega_n^2}{s^2 + 2 \zeta \omega_n s + \omega_n^2}
+%   \end{equation*}
+% \end{itemize}
+% \end{frame}
+
+% \begin{frame}[<+->][c]\frametitle{Sistemas de Primer Orden - Respuesta Paso}
+% \vspace*{3mm}
+% \begin{columns}
+%  \begin{column}{0.3\textwidth}
+%   \begin{equation*}
+%     H(s) = \frac{K}{\tau s + 1}
+%   \end{equation*}
+%   $K$: Ganancia\\
+%   $\tau$: Constante de tiempo
+%  \end{column} 
+%  \begin{column}{0.7\textwidth}
+%   \centering
+%   \includegraphics[width=10cm]{images/firstOrderResponse.eps}
+%  \end{column} 
+% \end{columns}
+% \end{frame}
+
+% \begin{frame}\frametitle{Sistemas de Primer Orden mas Tiempo Muerto - Respuesta Paso}
+% \vspace*{3mm}
+% \begin{columns}
+%  \begin{column}{0.3\textwidth}
+%   \begin{equation*}
+%     H(s) = \frac{K e^{-Ls}}{\tau s + 1}
+%   \end{equation*}
+%   $K$: Ganancia\\
+%   $\tau$: Constante de tiempo\\
+%   $L$: Tiempo muerto
+%  \end{column} 
+%  \begin{column}{0.7\textwidth}
+%   \centering
+%   \includegraphics[width=10cm]{images/firstOrder+deadTimeResponse.eps}
+%  \end{column} 
+% \end{columns}
+% \end{frame}
+
+% \begin{frame}\frametitle{Sistemas de Segundo Orden - Respuesta Paso}
+% \vspace*{3mm}
+% \begin{columns}
+%  \begin{column}{0.3\textwidth}
+%   \begin{equation*}
+%     H(s) = \frac{\omega_n^2}{s^2 + 2 \zeta \omega_n s + \omega_n^2}
+%   \end{equation*}
+%   $\omega_n$: Frecuencia natural\\
+%   $\zeta$: Factor de amortiguamiento\\
+%   \vspace*{5mm}
+%   $\zeta < 1$: subamortiguado\\
+%   $\zeta = 1$: críticamente amortiguado\\
+%   $\zeta > 1$: sobreamortiguado
+
+%  \end{column} 
+%  \begin{column}{0.7\textwidth}
+%   \centering
+%   \includegraphics[width=9cm]{images/secondOrderResponse.eps}
+%  \end{column} 
+% \end{columns}
+% \end{frame}
+
+% \begin{frame}[<+->]\frametitle{Respuesta Transitoria}
+%   La respuesta transitoria del sistema puede describirse en función de dos factores:
+%   \begin{itemize}
+%     \item La \textbf{rapidez de la respuesta}, la cual está representada por el \textbf{tiempo de subida} y el \textbf{tiempo pico}.
+%     \item La \textbf{proximidad de la respuesta al valor final}, representada por el \textbf{sobrepico} y el \textbf{tiempo de establecimiento}.
+%   \end{itemize}
+% \end{frame}
+
+% \begin{frame}[<+->]\frametitle{Respuesta Transitoria}
+%   \begin{itemize}
+%     \item \textbf{Tiempo de subida} ($T_r$): Tiempo que tarda la respuesta en ir del 10\% al 90\% del valor final.
+%     \item \textbf{Tiempo pico} ($T_p$): Tiempo en el cual la respuesta alcanza el valor máximo.
+%     \item \textbf{Sobrepico} ($PO$): Relación en porcentaje entre el valor máximo y el valor final.
+%     \item \textbf{Tiempo de establecimiento} ($T_s$): Tiempo que tarda la respuesta en mantenerse dentro de un 2\% del valor final.
+%   \end{itemize}
+% \end{frame}
+
+% \begin{frame}\frametitle{Respuesta Transitoria - Sistemas de Primer Orden}
+% \vspace*{3mm}
+% \begin{columns}
+%  \begin{column}{0.3\textwidth}
+%  \textbf{Tiempo de subida:}
+%  \begin{equation*}
+%    T_r = 2.2 \tau
+%  \end{equation*}
+%  \textbf{Tiempo de establecimiento:}
+%  \begin{equation*}
+%   T_s = 4 \tau
+%  \end{equation*}
+%  \end{column} 
+%  \begin{column}{0.7\textwidth}
+%   \centering
+%   \includegraphics[width=10cm]{images/firstOrderResponse.eps}
+%  \end{column} 
+% \end{columns}
+% \end{frame}
+
+% \begin{frame}[<-+>]\frametitle{Respuesta Transitoria - Sistemas de Primer Orden mas Tiempo Muerto}
+% \vspace*{3mm}
+% \begin{columns}
+%  \begin{column}{0.3\textwidth}
+%  \textbf{Tiempo de subida:}
+%  \begin{equation*}
+%    T_r = 2.2 \tau
+%  \end{equation*}
+%  \textbf{Tiempo de establecimiento:}
+%  \begin{equation*}
+%   T_s = L + 4 \tau
+%  \end{equation*}
+%  \end{column} 
+%  \begin{column}{0.7\textwidth}
+%   \centering
+%   \includegraphics[width=10cm]{images/firstOrder+deadTimeResponse.eps}
+%  \end{column} 
+% \end{columns}
+% \end{frame}
+
+% \begin{frame}\frametitle{Respuesta Transitoria - Sistemas de Segundo Orden}
+% \vspace*{3mm}
+% \begin{columns}
+%  \begin{column}{0.3\textwidth}
+%  \textbf{Tiempo de establecimiento:}
+%  \begin{equation*}
+%   T_s = 4 \tau = \frac{4}{\zeta \omega_n}
+%  \end{equation*}
+%  \textbf{Tiempo de pico:}
+%  \begin{equation*}
+%    T_p = \frac{\pi}{\omega_n \sqrt{1-\zeta^2}}
+%  \end{equation*}
+%  \textbf{Sobrepico:}
+%  \begin{equation*}
+%    PO = 100 e^{-\zeta \pi/\sqrt{1-\zeta^2}}
+%  \end{equation*}
+%  \end{column} 
+%  \begin{column}{0.7\textwidth}
+%   \centering
+%   \includegraphics[width=9cm]{images/secondOrderResponseParameters.eps}
+%  \end{column} 
+% \end{columns}
+% \end{frame}
+
+% \begin{frame}\frametitle{Respuesta Transitoria - Sistemas de Segundo Orden}
+% \vspace*{3mm}
+% \begin{columns}
+%  \begin{column}{0.3\textwidth}
+%  \textbf{Tiempo de subida:}
+%  \begin{equation*}
+%    T_{r1} = \frac{2.16\zeta + 0.60}{\omega_n}
+%  \end{equation*}
+%  Aproximación lineal válida para $0.3 \leq \zeta \leq 0.8$.
+%  \end{column} 
+%  \begin{column}{0.7\textwidth}
+%   \centering
+%   \includegraphics[width=9cm]{images/secondOrderRiseTime.eps}
+%  \end{column} 
+% \end{columns}
+% \end{frame}
+
+% \begin{frame}\frametitle{Respuesta Transitoria - Sistemas de Segundo Orden}
+% \vspace*{3mm}
+% \centering
+% \includegraphics[width=8cm]{images/secondOrderResponseSameZeta.eps}\\
+% Respuesta paso para $\zeta = 0.2$ con $\omega_n = 1$ y $\omega_n = 10$.
+% \end{frame}
+
+% \begin{frame}\frametitle{Respuesta Transitoria - Sistemas de Segundo Orden}
+% \vspace*{3mm}
+% \centering
+% \includegraphics[width=8cm]{images/secondOrderResponseSameOmega.eps}\\
+% Respuesta paso para $\omega_n = 5$ con $\zeta = 0.7$ y $\zeta = 1$.
+% \end{frame}
+
+% \begin{frame}[c]\frametitle{Taller}
+% \begin{enumerate}
+%   \item Para el sistema mostrado en la figura, considere como entrada la fuerza aplicada sobre la masa de la izquierda, y la salida como la distancia entre las dos masas. Obtenga las ecuaciones diferenciales que describen el sistema, la representación en el espacio de estados y la función de transferencia.
+%   \seti
+% \end{enumerate}
+% \begin{center}
+%   \includegraphics[width=8cm]{images/twoMassSystem.eps}
+% \end{center}
+% \end{frame}
+
+% \begin{frame}[c]\frametitle{Taller}
+% \begin{enumerate}
+%   \conti
+%   \item El control de inyecciones de insulina puede permitir mejorar la calidad de vida de pacientes diabéticos. La inyección automática de insulina usando una bomba y un sensor que mide los niveles de azucar en la sangre puede ser un tratamiento efectivo. La figura muestra el sistema de control correspondiente a éste proceso. Calcule un valor apropiado para $K$ tal que $PO = 7\%$. Calcule $T_s$ y $T_p$.
+%   \seti
+% \end{enumerate}
+% \begin{center}
+%   \includegraphics[width=10cm]{images/insulin.eps}
+% \end{center}
+% \end{frame}
+
+
+\end{document}
