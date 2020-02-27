@@ -1,0 +1,539 @@
+\documentclass[aspectratio=169,handout]{beamer}
+% \usepackage[utf8]{inputenc}
+\usetheme{metropolis}
+\usecolortheme{orchid}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{multirow}
+\usepackage[ruled]{algorithm2e}
+\usepackage{mathtools}
+\usepackage{caption}
+\usepackage{epstopdf}
+\usepackage{hyperref}
+\setbeamerfont{footnote}{size=\tiny}
+
+\usepackage{tikz}
+\usetikzlibrary{mindmap,shadows,tikzmark,positioning,arrows.meta}
+
+% Information boxes
+\newcommand*{\info}[4][16.3]{%
+  \node [ annotation, #3, scale=0.65, text width = #1em,
+          inner sep = 2mm ] at (#2) {%
+  \list{$\bullet$}{\topsep=0pt\itemsep=0pt\parsep=0pt
+    \parskip=0pt\labelwidth=8pt\leftmargin=8pt
+    \itemindent=0pt\labelsep=2pt}%
+    #4
+  \endlist
+  };
+}
+
+\tikzset{%
+  >={Latex[width=2mm,length=2mm]},
+  % Specifications for style of nodes:
+            base/.style = {rectangle, rounded corners, draw=black,
+                           minimum width=4cm, minimum height=1cm,
+                           text centered, font=\sffamily},
+  activityStarts/.style = {base, fill=blue!30},
+       startstop/.style = {base, fill=red!30},
+    activityRuns/.style = {base, fill=green!30},
+         process/.style = {base, minimum width=2.5cm, fill=orange!15,
+                           font=\ttfamily},
+}
+\renewcommand\textbullet{\ensuremath{\bullet}}
+\newcommand\scalemath[2]{\scalebox{#1}{\mbox{\ensuremath{\displaystyle #2}}}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+%%% Bibliography
+\usepackage[citestyle=numeric,style=numeric,backend=biber,doi=false,isbn=false,url=false]{biblatex}
+\addbibresource{references.bib}
+
+%%% Suppress biblatex annoying warning
+\usepackage{silence}
+\WarningFilter{biblatex}{Patching footnotes failed}
+
+%%% new theorems %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\theoremstyle{definition}
+\newtheorem{mydef}{Definition}
+
+\theoremstyle{plain}
+\newtheorem{mylemma}{Lemma}[section]
+\newtheorem{mytheorem}{Theorem}[section]
+\newtheorem{myproposition}{Proposition}[section]
+\newtheorem{myproblem}{Problem}[section]
+\newtheorem{mydefinition}{Definition}[section]
+\newtheorem{myassumption}{Assumption}[section]
+
+\theoremstyle{remark}
+\newtheorem{myremark}{Remark}[section]
+
+\newcounter{saveenumi}
+\newcommand{\seti}{\setcounter{saveenumi}{\value{enumi}}}
+\newcommand{\conti}{\setcounter{enumi}{\value{saveenumi}}}
+
+\resetcounteronoverlays{saveenumi}
+
+\title{Control de Sistemas}
+\subtitle{\small Clase 6: Control ON/OFF, PID}
+\author{Gerardo Becerra, Ph.D.}
+\institute{Pontificia Universidad Javeriana\\ Departamento de Electrónica}
+\date{Febrero 25, 2020}
+
+\begin{document}
+
+\frame{\titlepage}	
+
+% \frame{\tableofcontents}
+
+% \section{Tipos de Control}
+\begin{frame}[<+->]\frametitle{Clasificación Básica de Controladores}
+\textbf{Se clasifican según la acción de control:}\\
+\begin{enumerate}
+  \item Dos posiciones (ON-OFF o BANG-BANG)
+  \item Proporcional (P)
+  \item Integral (I)
+  \item Derivativo (D)
+  \item Proporcional - Integral (PI)
+  \item Proporcional - Derivativo (PD)
+  \item Proporcional - Integral - Derivativo (PID)
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Controlador ON-OFF / BANG-BANG / TODO-NADA}
+\begin{columns}
+  \begin{column}{0.5\textwidth}
+    \vspace*{5mm}
+    \includegraphics[width=7cm]{images/onoffcontroller.eps}
+    \vspace*{-5mm}
+    \begin{itemize}
+      \item Se caracteriza porque el actuador posee sólo dos posiciones: encendido - apagado.
+      \item Ventajas:
+      \begin{itemize}
+        \item Implementación simple.
+        \item Implementación barata.
+        \item Uso común en aplicaciones domésticas.
+      \end{itemize}
+    \end{itemize}
+  \end{column} 
+  \begin{column}{0.5\textwidth}
+    \begin{align*}
+      u(t) =
+      \begin{cases}
+        U_1 & \text{si } e(t) > 0\\
+        U_2 & \text{si } e(t) < 0\\
+      \end{cases}
+    \end{align*}
+    \begin{itemize}
+      \item En la práctica generalmente no se usa éste controlador $\rightarrow$ puede provocar muchas conmutaciones $\rightarrow$ puede producir desgaste en el actuador.
+      \item En su lugar se usa un controlador con histéresis.
+    \end{itemize}
+  \end{column} 
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Controlador ON-OFF con Histéresis}
+\begin{columns}
+  \begin{column}{0.5\textwidth}
+    \vspace*{5mm}
+    \includegraphics[width=7cm]{images/onoffcontrollerHisteresis.eps}
+    \vspace*{-5mm}
+    \begin{itemize}
+      \item Permite mantener el valor presente de $u(t)$ hasta que la señal de error se haya movido más allá del valor cero.
+      \item La amplitud de la oscilación puede reducirse disminuyendo la brecha diferencial $\rightarrow$ más conmutaciones.
+    \end{itemize}
+  \end{column} 
+  \begin{column}{0.5\textwidth}
+    \begin{center}
+    \includegraphics[width=5.5cm]{images/onoffcontrollerLevel.eps}
+    \end{center}
+    \vspace*{-5mm}
+    \begin{itemize}
+      \item No se puede utilizar para modificar transitorios.
+    \end{itemize}
+  \end{column} 
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Controlador Proporcional (P)}
+\begin{columns}
+  \begin{column}{0.5\textwidth}
+    \vspace*{5mm}
+    \includegraphics[width=7cm]{images/Pcontroller.eps}
+    \vspace*{-5mm}
+    \begin{itemize}
+      \item Es un amplificador de error.
+      \begin{align*}
+        U(s) = K_p E(s)
+      \end{align*}
+      \item Dependencia de $E(s)$ de la ganancia $K_p$:
+      \begin{align*}
+        E(s) = \frac{1}{1+K_p G(s)}R(s)
+      \end{align*}
+    \end{itemize}
+  \end{column} 
+  \begin{column}{0.5\textwidth}
+    \begin{itemize}
+      \item $K_p$ aumenta $\Rightarrow$ menor error de estado estacionario.
+      \item $K_p$ muy grande no elimina el error de estado estacionario:
+      \item $K_p$ muy grande puede ocasionar inestabilidad.
+    \end{itemize}
+  \end{column} 
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Controlador Proporcional (P) - Error de Estado Estacionario}
+  \begin{align*}
+    E(s) = \frac{1}{1+K_p G(s)}R(s)
+  \end{align*}
+  \pause
+  Asumiendo $G(s)$ de la forma:
+  \begin{align*}
+    G(s) = \frac{a_n s^n + a_{n-1} s^{n-1} + \dots + a_1 s + a_0}{b_m s^m + b_{m-1} s^{m-1} + \dots + b_1 s + b_0}
+  \end{align*}
+  \pause
+  Usando el teorema del valor final: 
+  \begin{align*}
+    e_{ss} = \lim_{s \rightarrow 0} s \left(\frac{1}{s}\right) \left(\frac{1}{1 + K_p G(s)}\right) = \frac{1}{1 + K_p \frac{a_0}{b_0}}
+  \end{align*}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Controlador Proporcional (P) - Ejemplo}
+  Suponga  $G(s) = \frac{1}{s+a}$. Entonces la ganancia de lazo cerrado será:
+  \begin{align*}
+    G_{lc}(s) = \frac{K_p}{s+a+K_p}
+  \end{align*}
+  \pause
+  Si $R(s) = 1/s$ (escalón unitario) entonces:
+  \begin{align*}
+    Y(s) = \left(\frac{K_p}{s+a+K_p}\right) \frac{1}{s}
+  \end{align*}
+  \pause
+  Aplicando la transformada inversa de Laplace:
+  \begin{equation*}
+    y(t) = \frac{K_p}{K_p+a} \left(1-e^{-t(K_p+a)}\right)
+  \end{equation*}
+  \pause
+  Si $K_p$ se incrementa, el sistema será más rápido (no es el caso general).
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Controlador Proporcional (P) - Rechazo a Perturbaciones}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\vspace*{-3mm}
+\begin{center}
+  \includegraphics[width=7.5cm]{images/PcontrollerwithDisturbance.eps}\\
+\end{center}
+\pause
+Asumiendo $R(s) = 0$:
+\begin{equation*}
+  \frac{Y(s)}{D(s)} = \frac{G(s)}{1 + K_p G(s)}
+\end{equation*}
+\pause
+Asumiendo $G(s)$ de la forma:
+\begin{align*}
+  G(s) = \frac{a_n s^n + a_{n-1} s^{n-1} + \dots + a_1 s + a_0}{b_m s^m + b_{m-1} s^{m-1} + \dots + b_1 s + b_0}
+\end{align*}
+\end{column}
+\pause
+\begin{column}{0.5\textwidth}
+  Usando el teorema del valor final, asumiendo perturbación constante: 
+  \begin{align*}
+    y_{ss} &= \lim_{s \rightarrow 0} s \left(\frac{1}{s}\right) \left(\frac{G(s)}{1 + K_p G(s)}\right)\\
+    &= \frac{a_0}{b_0 + K_p a_0}
+  \end{align*}
+  \pause
+  Incrementar $K_p$ reduce el efecto de la perturbación, pero no lo elimina. No es inmune al ruido.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Controlador Proporcional (P) - Ventajas y Desventajas}
+  \begin{itemize}
+    \item Ventajas:
+    \begin{itemize}
+      \item Instantaneidad de aplicación.
+      \item Facilidad para comprobar resultados.
+    \end{itemize}
+    \item Desventajas:
+    \begin{itemize}
+      \item Falta de inmunidad a ruido.
+      \item No corrige algunos errores en estado estacionario.
+      \item Puede hacer inestable al sistema.
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Controlador Integral (I)}
+% \vspace*{-5mm}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\begin{center}
+  \includegraphics[width=7cm]{images/Icontroller.eps}
+\end{center}
+\pause
+\begin{equation*}
+  u(t) = \int_0^t e(t) dt \longrightarrow \frac{U(s)}{E(s)} = \frac{K_i}{s}
+\end{equation*}
+\pause
+Ganancia de lazo cerrado:
+\begin{equation*}
+  G_{lc}(s) = \frac{Y(s)}{R(s)} = \frac{K_i G(s)}{s + K_i G(s)}
+\end{equation*}
+\pause
+Dependencia de $E(s)$ de la ganancia $K_i$:
+\begin{equation*}
+E(s) = (1-G_{lc}(s)) = \frac{s}{s+K_i G(s)} R(s)
+\end{equation*}
+\pause
+\end{column}
+\begin{column}{0.5\textwidth}
+Asumiendo $G(s)$ de la forma:
+\begin{align*}
+  G(s) = \frac{a_n s^n + a_{n-1} s^{n-1} + \dots + a_1 s + a_0}{b_m s^m + b_{m-1} s^{m-1} + \dots + b_1 s + b_0}
+\end{align*}
+\pause
+Usando el teorema del valor final:
+\begin{equation*}
+  e_{ss} = \lim_{s \rightarrow 0} s \frac{s}{s + K_i \frac{a_n s^n + a_{n-1} s^{n-1} + \dots + a_1 s + a_0}{b_m s^m + b_{m-1} s^{m-1} + \dots + b_1 s + b_0}}R(s) 
+\end{equation*}
+\pause
+Si $R(s) = 1/s$, entonces $e_{ss} = 0$.\\
+\textbf{El integrador anula el error de estado estable.}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Controlador Integral (I) - Rechazo a Perturbaciones}
+\begin{align*}
+  \frac{Y(s)}{D(s)} &= \frac{G(s)}{1+\frac{K_i}{s}G(s)} = \frac{\frac{a_n s^n + \dots + a_0}{b_m s^m + \dots + b_0}}{1 + \frac{K_i}{s}\frac{a_n s^n + \dots + a_0}{b_m s^m + \dots + b_0}}\\
+  &= \frac{(a_n s^n + \dots + a_0)s}{(b_m s^m + \dots + b_0)s + K_i(a_n s^n + \dots + a_0)} 
+\end{align*}
+\pause
+Si $D(s) = 1/s$ (escalón unitario), entonces
+\begin{equation*}
+  y_{ss} = \lim_{s \rightarrow 0} s \frac{1}{s} \frac{(a_n s^n + \dots + a_0)s}{(b_m s^m + \dots + b_0)s + K_i(a_n s^n + \dots + a_0)} = 0
+\end{equation*}
+\pause
+\textbf{El integrador elimina perturbaciones en estado estacionario.}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Controlador Integral (I) - Ventajas y Desventajas}
+  \begin{itemize}
+    \item Ventajas:
+    \begin{itemize}
+      \item Elimina error de estado estacionario.
+      \item Elimina efecto de las perturbaciones (robustez).
+    \end{itemize}
+    \item Desventajas:
+    \begin{itemize}
+      \item La aplicación no es instantánea.
+      \item Puede agregar inestabilidad al sistema total debido al polo en el origen.
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Controlador Proporcional - Integral (PI)}
+\begin{center}
+  \includegraphics[width=8cm]{images/PIcontroller.eps}
+\end{center}
+\pause
+\begin{equation*}
+  u(t) = K_p e(t) + K_i \int_0^t e(t) dt \longrightarrow U(s) = K_p E(s) + K_i \frac{E(s)}{s}
+\end{equation*}
+\pause
+\begin{equation*}
+  \frac{U(s)}{E(s)} = K_p + \frac{K_i}{s} = \frac{K_p s + K_i}{s}
+\end{equation*}
+% \pause
+% \begin{equation*}
+%   \frac{U(s)}{E(s)} = K_p \left(1 + \frac{1}{T_i s} \right),\ T_i\text{: Tiempo integral}
+% \end{equation*}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Controlador Proporcional - Integral (PI)}
+\begin{align*}
+  G_{lc}(s) = \frac{Y(s)}{R(s)} = \frac{\frac{K_ps + K_i}{s}G(s)}{1 + \frac{K_ps + K_i}{s}G(s)} = \frac{(K_ps + K_i)G(s)}{s + (K_ps+K_i)G(s)}
+\end{align*}
+\pause
+\begin{align*}
+  E(s) = R(s) - Y(s) = R(s) - G_{lc}(s)R(s)
+\end{align*}
+\pause
+\begin{align*}
+  \frac{E(s)}{R(s)} = 1 - G_{lc}(s) = 1 - \frac{(K_ps + K_i)G(s)}{s + (K_ps+K_i)G(s)} = \frac{s}{s + (K_ps + K_i)G(s)}
+\end{align*}
+\pause
+Aplicando el teorema del valor final:
+\begin{equation*}
+  e_{ss} = \lim_{s \rightarrow 0} s \frac{s}{s + (K_ps + K_i)G(s)} R(s)
+\end{equation*}
+\pause
+Si $R(s) = 1/s$ (escalón unitario), entonces $e_{ss} = 0$. \textbf{El controlador anula el error de estado estacionario.}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Controlador Proporcional - Integral (PI) - Rechazo a Perturbaciones}
+\begin{equation*}
+  \frac{Y(s)}{D(s)} = \frac{G(s)}{1 + G(s)\frac{K_ps + K_i}{s}} = \frac{G(s)s}{s + G(s)(K_ps+K_i)}
+\end{equation*}
+\pause
+Si $D(s) = 1/s$, entonces:
+\begin{equation*}
+  y_{ss} = \lim_{s \rightarrow 0} s \frac{1}{s} \frac{G(s)s}{s + G(s)(K_ps+K_i)} = 0
+\end{equation*}
+\pause
+\textbf{El controlador elimina el efecto de las perturbaciones.}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Controlador Proporcional - Integral (PI) - Ventajas}
+\begin{itemize}
+  \item Respuesta inmediata
+  \item Elimina error de estado estacionario.
+  \item Elimina efecto de las perturbaciones (robustez).
+\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Control Derivativo (D)}
+\begin{center}
+  \includegraphics[width=8cm]{images/Dcontroller.eps}
+\end{center}
+\pause
+\begin{equation*}
+  u(t) = K_d \frac{de(t)}{dt} \longrightarrow U(s) = K_d s E(s) \rightarrow \frac{U(s)}{E(s)} = K_d s
+\end{equation*}
+\pause
+\begin{align*}
+  \frac{E(s)}{R(s)} = 1 - G_{lc}(s) = 1 - \frac{G(s) K_d s}{1 + G(s) K_d s} = \frac{1}{1 + K_d s G(s)}
+\end{align*}
+\pause
+\begin{equation*}
+  e_{ss} = \lim_{s \rightarrow 0} s \frac{A}{s} \frac{1}{1 + K_d s G(s)} = A
+\end{equation*}
+\pause
+\textbf{No elimina el error de estado estacionario!}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Control Derivativo (D) - Rechazo a Perturbaciones}
+Si $R(s) = 0$:
+\begin{equation*}
+  \frac{Y(s)}{D(s)} = \frac{G(s)}{1 + G(s) K_d s}
+\end{equation*}
+\pause
+Asumiendo $D(s) = A/s$:
+\begin{equation*}
+  y_{ss} = \lim_{s \rightarrow 0} s \frac{A_p}{s} \frac{G(s)}{1 + G(s) K_d s} = A_p G(s)
+\end{equation*}
+\pause
+\textbf{No elimina perturbaciones!}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Control Derivativo (D) - Análisis en Tiempo}
+\begin{columns}
+\begin{column}{0.3\textwidth}
+\begin{center}
+  \includegraphics[width=5cm]{images/Dcontroller_time.eps}
+\end{center}
+\end{column} 
+\begin{column}{0.7\textwidth}
+  \begin{itemize}
+    \item Debido a la dinámica del proceso, pasa algún tiempo hasta que cambios en la variable de control produzcan cambios en la salida del proceso.
+    \item La acción derivativa trata de \textit{predecir} o \textit{anticipar} el valor que tomará la señal de error para dar un valor a la señal de control.
+    \item Ventaja: Es anticipativo. adelanta la acción de control frente a la aparición de una tendencia del error (sólo aplica a transitorios).
+    \item Desventaja: Inaplicable ante la presencia de ruido.
+  \end{itemize}
+\end{column} 
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Control Proporcional - Derivativo (PD)}
+\begin{center}
+  \includegraphics[width=8cm]{images/PDcontroller.eps}
+\end{center}
+\pause
+\begin{equation*}
+  u(t) = K_p e(t) + K_d \frac{de(t)}{dt} \longrightarrow U(s) = K_p E(s) + K_d s E(s) \rightarrow \frac{U(s)}{E(s)} = K_p + K_d s
+\end{equation*}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+Ventajas:
+\begin{itemize}
+  \item Reduce el error de estado estable.
+  \item Adelanta la acción de control (es anticipativo).
+  \item La respuesta es inmediata.
+\end{itemize}
+\end{column}
+\begin{column}{0.5\textwidth}
+Desventajas:
+\begin{itemize}
+  \item No corrije errores en estado estacionario.
+  \item Es sensible a ruidos. Generalmente se utiliza con un filtro en la entrada.
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Control Proporcional - Integral - Derivativo (PID)}
+\begin{center}
+  \includegraphics[width=8cm]{images/PIDcontroller.eps}
+\end{center}
+\pause
+\begin{align*}
+  u(t) = K_p e(t) + K_i \int_0^t e(t) dt + K_d \frac{de(t)}{dt}
+\end{align*}
+\pause
+\begin{align*}
+  U(s) = K_p E(s) + K_i \frac{E(s)}{s} + K_d s E(s) \rightarrow \frac{U(s)}{E(s)} = K_p + \frac{K_i}{s} + K_d s
+\end{align*}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Control Proporcional - Integral - Derivativo (PID)}
+\begin{center}
+  \includegraphics[width=8cm]{images/PIDcontroller.eps}
+\end{center}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+Ventajas:
+\begin{itemize}
+  \item Elimina error de estado estacionario (I).
+  \item Elimina efecto de las perturbaciones (I).
+  \item Es anticipativo (D).
+  \item Tiene una acción inmediata (P).
+\end{itemize}
+\end{column}
+\begin{column}{0.5\textwidth}
+Desventajas:
+\begin{itemize}
+  \item Tiene un polo en el origen (genera inestabilidad).
+  \item La parte derivativa amplifica el ruido.
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Sintonización de Controladores}
+\textbf{Cómo encontrar los valores $K_p$, $K_i$, $K_d$?} No existe una manera única de encontrarlos! Existen muchos métodos:
+\begin{itemize}
+  \item Experimental.
+  \item Análisis de una F.T.
+  \item Técnicas de optimización.
+  \item Lugar geométrico de las raíces.
+  \item Compensación en frecuencia.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Ejemplo: Control PID de un Sistema de Segundo Orden}
+\footnotesize
+Considere el siguiente lazo de control:
+\begin{center}
+  \includegraphics[width=8cm]{images/example2.eps}
+\end{center}
+\vspace*{-5mm}
+\begin{enumerate}
+  \item Calcule el valor de la ganancia $K_p$ para obtener un sobrepico de 10\% ante una entrada paso unitaria. Realice la simulación y verifique el resultado.
+  \item Considere ahora el sistema $G(s) = \frac{1}{s^2 + 3.6s + 1}$. Cómo cambia la respuesta al simular el sistema con la ganancia encontrada anteriormente?
+  \item Usando prueba y error, encuentre ganancias $K_p$ y $K_i$ de un control PI que mejore la respuesta del nuevo sistema.
+  \item Usando prueba y error, encuentre ganancias $K_p$ y $K_d$ de un control PD que mejore la respuesta del nuevo sistema.
+  \item Usando prueba y error, encuentre ganancias $K_p$, $K_i$ y $K_d$ de un control PID que mejore la respuesta del nuevo sistema.
+\end{enumerate}
+\end{frame}
+
+\end{document}

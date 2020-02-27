@@ -1,0 +1,458 @@
+\documentclass[aspectratio=169,handout]{beamer}
+% \usepackage[utf8]{inputenc}
+\usetheme{metropolis}
+\usecolortheme{orchid}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{multirow}
+\usepackage[ruled]{algorithm2e}
+\usepackage{mathtools}
+\usepackage{caption}
+\usepackage{epstopdf}
+\usepackage{hyperref}
+\usepackage{verbatim}
+\usepackage[makeroom]{cancel}
+\setbeamerfont{footnote}{size=\tiny}
+\setbeamertemplate{theorems}[ams style] 
+
+\usepackage{tikz}
+\usetikzlibrary{mindmap,shadows,tikzmark,positioning,arrows.meta}
+
+% Information boxes
+\newcommand*{\info}[4][16.3]{%
+  \node [ annotation, #3, scale=0.65, text width = #1em,
+          inner sep = 2mm ] at (#2) {%
+  \list{$\bullet$}{\topsep=0pt\itemsep=0pt\parsep=0pt
+    \parskip=0pt\labelwidth=8pt\leftmargin=8pt
+    \itemindent=0pt\labelsep=2pt}%
+    #4
+  \endlist
+  };
+}
+
+\tikzset{%
+  >={Latex[width=2mm,length=2mm]},
+  % Specifications for style of nodes:
+            base/.style = {rectangle, rounded corners, draw=black,
+                           minimum width=4cm, minimum height=1cm,
+                           text centered, font=\sffamily},
+  activityStarts/.style = {base, fill=blue!30},
+       startstop/.style = {base, fill=red!30},
+    activityRuns/.style = {base, fill=green!30},
+         process/.style = {base, minimum width=2.5cm, fill=orange!15,
+                           font=\ttfamily},
+}
+\renewcommand\textbullet{\ensuremath{\bullet}}
+\newcommand\scalemath[2]{\scalebox{#1}{\mbox{\ensuremath{\displaystyle #2}}}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+%%% Bibliography
+\usepackage[citestyle=numeric,style=numeric,backend=biber,doi=false,isbn=false,url=false]{biblatex}
+\addbibresource{references.bib}
+
+%%% Suppress biblatex annoying warning
+\usepackage{silence}
+\WarningFilter{biblatex}{Patching footnotes failed}
+
+%%% new theorems %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\theoremstyle{definition}
+\newtheorem{mydef}{Definition}
+
+\theoremstyle{plain}
+\newtheorem{mylemma}{Lemma}[section]
+\newtheorem{mytheorem}{Theorem}[section]
+\newtheorem{myproposition}{Proposition}[section]
+\newtheorem{myproblem}{Problem}[section]
+\newtheorem{mydefinition}{Definition}[section]
+\newtheorem{myassumption}{Assumption}[section]
+
+\theoremstyle{remark}
+\newtheorem{myremark}{Remark}[section]
+
+\newcounter{saveenumi}
+\newcommand{\seti}{\setcounter{saveenumi}{\value{enumi}}}
+\newcommand{\conti}{\setcounter{enumi}{\value{saveenumi}}}
+
+\resetcounteronoverlays{saveenumi}
+
+\title{Control de Sistemas}
+\subtitle{\small Clase 5: Especificaciones de Desempeño}
+\author{Gerardo Becerra, Ph.D.}
+\institute{Pontificia Universidad Javeriana\\ Departamento de Electrónica}
+\date{Febrero 25, 2020}
+
+\begin{document}
+
+\frame{\titlepage}	
+
+% \frame{\tableofcontents}
+
+\begin{frame}[<+->]\frametitle{Introducción}
+\begin{itemize}
+	\item Objetivo del diseño de sistemas de control $\rightarrow$ ajustar la respuesta transitoria y de estado estacionario.
+	\item Proceso de diseño $\rightarrow$ requiere definir y medir el desempeño.
+	\item Desempeño deseado $\Rightarrow$ ajuste de parámetros del controlador $\rightarrow$ respuesta deseada.
+	\item Dos partes de la respuesta:
+	\begin{itemize}
+		\item Respuesta transitoria: Desaparece con el tiempo.
+		\item Respueta de estado estacionario: existe por un largo tiempo después del estímulo inicial.
+	\end{itemize}
+	\item Especificaciones de diseño:
+	\begin{itemize}
+		\item Índices de la respuesta en tiempo para determinada entrada de prueba.
+		\item Exactitud de la respuesta en estado estacionario.
+	\end{itemize}
+	\item Compromiso entre diferentes índices de desempeño.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Señales de Prueba}
+	\begin{itemize}
+		\item Inicialmente, debe determinarse si el sistema de control es estable.
+		\item Si es estable, la respuesta a determinadas señales de prueba provee varias medidas de desempeño.
+		\item Usualmente, la entrada del sistema en condiciones de operación no es conocida $\rightarrow$ se usan señales de prueba.
+		\item Usar una señal de prueba estandar $\rightarrow$ permite comparar diferentes diseños.
+	\end{itemize}
+	\begin{figure}
+		\includegraphics[width=8cm]{images/testSignals.eps}
+		\caption{Señales de prueba: (a) escalón, (b) rampa, (c) parábola.}
+	\end{figure}
+\end{frame}
+
+\section{Desempeño de Sistemas de Segundo Orden}
+\begin{frame}\frametitle{Desempeño de Sistemas de Segundo Orden}
+\vspace*{3mm}
+\begin{columns}
+ \begin{column}{0.5\textwidth}
+ \begin{equation*}
+   T_p = \frac{\pi}{\omega_n \sqrt{1-\zeta^2}}
+ \end{equation*}
+ \begin{equation*}
+   PO = 100 e^{-\zeta \pi/\sqrt{1-\zeta^2}}
+ \end{equation*}
+  \centering
+  \includegraphics[width=7cm]{images/secondOrderResponseParameters.eps}\\
+ \end{column} 
+ \pause
+ \begin{column}{0.5\textwidth}
+  \centering
+  \includegraphics[width=6cm]{images/zetaCompromise.eps}\\
+  \textbf{Compromiso entre velocidad de la respuesta y sobrepico!}
+ \end{column}
+\end{columns} 
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Efectos de un Tercer Polo en la Respuesta de un Sistema de Segundo Orden}
+\vspace*{5mm}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+Sistema de Segundo Orden con un Polo en $s=-1/\gamma$:
+\begin{equation*}
+	T(s) = \frac{1}{(s^2+2 \zeta \omega_n s + 1)(\gamma s + 1)}
+\end{equation*}
+Condición para asumir que el efecto del tercer polo sobre los polos dominantes es \textit{despreciable}:
+\begin{equation*}
+	1/\gamma \geq 10 \zeta \omega_n
+\end{equation*}
+\end{column}	
+\begin{column}{0.5\textwidth}
+\centering
+\includegraphics[width=7cm]{images/thirdPole.eps}
+\end{column}	
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Efectos de un Tercer Cero en la Respuesta de un Sistema de Segundo Orden}
+\vspace*{5mm}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+Sistema de Segundo Orden con un Cero en $s=-a$: 
+\begin{equation*}
+	T(s) = \frac{(\omega_n^2/a)(s+a)}{(s^2+2 \zeta \omega_n s + \omega_n^2)}
+\end{equation*}
+Condición para asumir que el efecto del cero sobre los polos dominantes es \textit{despreciable}:
+\begin{equation*}
+	a \geq 10 \zeta \omega_n
+\end{equation*}
+\end{column}	
+\begin{column}{0.5\textwidth}
+\centering
+\includegraphics[width=6cm]{images/thirdZero.eps}
+\end{column}	
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Ubicación de los Polos y Respuesta Transitoria}
+\begin{itemize}
+	\item Relación polos - ceros determina la respuesta en tiempo.
+	\item Análisis y diseño de sistemas de control: ubicación de polos y ceros.
+	\item Efectos en la respuesta paso (impulso) al agregar o mover polos y ceros.
+	\item Polos: Determinan los modos de respuesta.
+	\item Ceros: Establecen ponderación relativa entre diferentes modos.
+	\item Cero cercano a un polo: disminuye la contribución relativa del polo a la respuesta del sistema.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Ubicación de los Polos y Respuesta Transitoria}
+\centering
+\includegraphics[width=10cm]{images/impulseResponsePoles.eps}\\
+Tipos de respuesta transitoria para diferentes ubicaciones de los polos.
+\end{frame}
+
+\section{Error en Estado Estacionario}
+\begin{frame}[<+->]\frametitle{Error en Estado Estacionario de Sistemas Retroalimentados}
+\begin{itemize}
+	\item Retroalimentación $\rightarrow$ útil para disminuir el error en estado estacionario.
+	\item Error en el lazo de retroalimentación:
+	\begin{equation*}
+		E(s) = \frac{1}{1+G_c(s)G(s)} R(s)
+	\end{equation*}
+	\item Usando el teorema del valor final:
+	\begin{equation*}
+		\lim_{t \rightarrow \infty} e(t) = e_{ss} = \lim_{s \rightarrow 0} s \frac{1}{1+G_c(s)G(s)}R(s)
+	\end{equation*}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Error en Estado Estacionario - Entrada Paso}
+\begin{columns}
+\begin{column}{0.6\textwidth}
+\begin{itemize}
+		\item Entrada paso: $R(s) = A/s$:
+		\begin{equation*}
+			e_{ss} = \lim_{s \rightarrow 0} s \frac{A/s}{1+G_c(s)G(s)} = \frac{A}{1 + \lim_{s \rightarrow 0}G_c(s)G(s)}
+		\end{equation*}
+		\item Función de transferencia general:
+		\begin{equation*}
+			G_c(s)G(s) = \frac{K\prod_{i=1}^M(s+z_i)}{s^N \prod_{k=1}^Q (s+p_k)}
+		\end{equation*}
+		\item $e_{ss}$ depende del número de integradores $N$. Para un sistema tipo cero ($N=0$):
+		\begin{equation*}
+			e_{ss} = \frac{A}{1+K\prod_{i=1}^M z_i/\prod_{k=1}^Q p_k}
+		\end{equation*}
+\end{itemize}	
+\end{column}	
+\begin{column}{0.4\textwidth}
+\begin{itemize}
+		\item Constante de error de posición: $K_p = \lim_{s \rightarrow 0} G_c(s)G(s)$.
+		\item Error de estado estacionario para $N = 0$:
+		\begin{equation*}
+			e_{ss} = \frac{A}{1 + K_p}
+		\end{equation*}
+		\item Error de estado estacionario Para $N \geq 1$:
+		\begin{equation*}
+			e_{ss} = \lim_{s \rightarrow 0} \frac{A}{1 + K\prod z_i/\prod p_k} = 0
+		\end{equation*}
+\end{itemize}	
+\end{column}	
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Error en Estado Estacionario - Entrada Rampa}
+\begin{itemize}
+	\item Para una rampa $R(s) = A/s^2$:
+	\begin{equation*}
+		e_{ss} = \lim_{s \rightarrow 0} s \frac{A/s^2}{1 + G_c(s)G(s)} = \lim_{s \rightarrow 0} \frac{A}{s + sG_c(s)G(s)}
+	\end{equation*}
+	\item $e_{ss}$ depende del número de integradores $N$. Para un sistema tipo cero ($N = 0$), $e_{ss} = \infty$.
+	\item Para un sistema tipo 1 ($N = 1$):
+	\begin{equation*}
+		e_{ss} = \lim_{s \rightarrow 0} \frac{A}{s K \prod (s+z_i)/ \left( s \prod (s + p_k) \right)} = \frac{A}{K \prod z_i/ \prod p_k } = \frac{A}{K_v}
+	\end{equation*}
+	\item Constante de error de velocidad:
+	\begin{equation*}
+		K_v = \lim_{s \rightarrow 0} sG_c(s)G(s) = K \prod z_i/ \prod p_k
+	\end{equation*}
+	\item Para un sistema tipo $N \geq 2$, $e_{ss} = 0$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Error en Estado Estacionario - Entrada Parábola}
+\begin{itemize}
+	\item Para una parábola $R(s) = A/s^3$:
+	\begin{equation*}
+		e_{ss} = \lim_{s \rightarrow 0} s \frac{A/s^3}{1 + G_c(s)G(s)} = \lim_{s \rightarrow 0} \frac{A}{s^2 + s^2G_c(s)G(s)}
+	\end{equation*}
+	\item Para un sistema tipo 1 ($N = 1$), $e_{ss} = \infty$.
+	\item Para un sistema tipo 2 ($N = 2$):
+	\begin{equation*}
+		e_{ss} = \frac{A}{K \prod z_i/ \prod p_k } = \frac{A}{K_a}
+	\end{equation*}
+	\item Constante de error de aceleración:
+	\begin{equation*}
+		K_v = \lim_{s \rightarrow 0} s^2G_c(s)G(s) = K \prod z_i/ \prod p_k
+	\end{equation*}
+	\item Para un sistema tipo $N \geq 3$, $e_{ss} = 0$.
+\end{itemize}
+\end{frame}
+
+\section{Índices de Desempeño}
+\begin{frame}[<+->]\frametitle{Índices de Desempeño}
+	% Sistema de control óptimo: los parámetros del sistema se ajustan para minimizar (maximizar) un índice de desempeño.
+	\begin{columns}
+	\begin{column}{0.5\textwidth}
+	\begin{itemize}
+		\item Integral del cuadrado del error (ISE):
+		\begin{equation*}
+			ISE = \int_0^T e^2(t) dt
+		\end{equation*}
+		\item Integral del valor absoluto del error (IAE):
+		\begin{equation*}
+			IAE = \int_0^T |e(t)| dt
+		\end{equation*}
+	\end{itemize}
+	\end{column}	
+	\begin{column}{0.5\textwidth}
+	\begin{itemize}
+		\item Integral del valor absoluto del error ponderado en el tiempo (ITAE):
+		\begin{equation*}
+			ITAE = \int_0^T t |e(t)| dt
+		\end{equation*}
+		\item Integral del cuadrado del error ponderado en el tiempo (ITSE):
+		\begin{equation*}
+			ITAE = \int_0^T t e^2(t) dt
+		\end{equation*}
+	\end{itemize}
+	\end{column}	
+	\end{columns}
+	\vspace*{-5mm}
+	\textbf{Objetivo:} seleccionar parámetros del sistema para minimizar algún índice de desempeño.
+	% $T$: Es conveniente seleccionarlo como el tiempo de establecimiento $T_s$.
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Índices de Desempeño}
+\vspace*{3mm}
+\begin{columns}
+\begin{column}{0.7\textwidth}
+	\begin{itemize}
+		\item ISE: otorga más peso a errores grandes, lo cual usualmente ocurre al inicio de la respuesta, y menos peso a errores pequeños, lo cual ocurre normalmente hacia el final de la respuesta.
+		\item ISE: produce ganancias del controlador grandes y respuestas muy oscilatorias.
+		\item ITAE, ITSE: agrega un término de penalización asociado al tiempo transcurrido.
+	\end{itemize}
+	\textbf{Integral del cuadrado del error (ISE):}
+	\begin{equation*}
+		ISE = \int_0^T e^2(t) dt
+	\end{equation*}
+\end{column}	
+\begin{column}{0.3\textwidth}
+\includegraphics[width=4cm]{images/ISEcomputation.eps}
+\end{column}	
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Minimización de los Índices de Desempeño}
+\begin{itemize}
+	\item Sistema de control $\rightarrow$ es óptimo cuando se minimiza algún índice de desempeño seleccionado.
+	\item Valor óptimo de los parámetros $\rightarrow$ depende del índice de desempeño.
+	\item Para la función de transferencia de lazo cerrado de la forma general:
+	\begin{equation*}
+		T(s) = \frac{Y(s)}{R(s)} = \frac{b_0}{s^n + b_{n-1} s^{n-1} + \dots + b_1 s + b0}
+	\end{equation*}
+	se han determinado los coeficientes óptimos que minimizan el ITAE para una entrada paso.
+	\item Ésta función de transferencia tiene $e_{ss} = 0$ para entrada paso.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Coeficientes Óptimos Basados en el Criterio ITAE para una Entrada Paso}
+\centering
+\begin{equation*}
+	T(s) = \frac{Y(s)}{R(s)} = \frac{b_0}{s^n + b_{n-1} s^{n-1} + \dots + b_1 s + b0}
+\end{equation*}
+\vspace*{10mm}
+\includegraphics[width=10cm]{images/optimCoeffsITAEstep.eps}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Coeficientes Óptimos Basados en el Criterio ITAE para una Entrada Rampa}
+\centering
+\begin{equation*}
+	T(s) = \frac{Y(s)}{R(s)} = \frac{b_1s + b_0}{s^n + b_{n-1} s^{n-1} + \dots + b_1 s + b0}
+\end{equation*}
+\vspace*{10mm}
+\includegraphics[width=8cm]{images/optimCoeffsITAEramp.eps} 
+\end{frame}
+
+\begin{frame}[c]\frametitle{Respuesta Paso para Coeficientes Óptimos Basados en Criterio IAE}
+\vspace*{5mm}
+\centering
+\includegraphics[width=8cm]{images/stepResponseOptimIAE.eps}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Respuesta Paso para Coeficientes Óptimos Basados en Criterio ITAE}
+\vspace*{5mm}
+\centering
+\includegraphics[width=8cm]{images/stepResponseOptimITAE.eps}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Respuesta Paso para Coeficientes Óptimos Basados en Criterio ISE}
+\vspace*{5mm}
+\centering
+\includegraphics[width=8cm]{images/stepResponseOptimISE.eps}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Taller}
+	\begin{enumerate}
+		\item Un sistema de control tiene la siguiente función de transferencia de lazo cerrado:
+		\begin{equation*}
+			T(s) = \frac{11.1 (s + 18)}{(s+20)(s^2 + 4s +10)}
+		\end{equation*}
+		\begin{itemize}
+			\item Grafique los polos y ceros del sistema.
+			\item Discuta la dominancia de los polos complejos conjugados.
+			\item Qué porcentaje de sobrepico para entrada paso esperaría obtener?
+		\end{itemize}
+		\seti
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Taller}
+	\begin{enumerate}
+		\conti
+		\item Un sistema de control de lazo cerrado con función de transferencia $T(s)$ tiene dos polo dominantes complejos conjugados. Realice un bosquejo de la región en el semiplano complejo izquierdo donde los polos deben ubicarse para satisfacer los requerimientos dados:
+		\begin{itemize}
+			\item $0.6 \leq \zeta \leq 0.8$, $\omega_n \leq 10$.
+			\item $0.5 \leq \zeta \leq 0.707$, $\omega_n \geq 10$.
+			\item $\zeta \geq 0.5$, $5 \leq \omega_n \leq 10$.
+			\item $\zeta \leq 0.707$, $5 \leq \omega_n \leq 10$.
+			\item $\zeta \geq 0.6$, $\omega_n \leq 6$.
+		\end{itemize}
+		\seti
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Taller}
+\begin{enumerate}
+	\conti
+	\item Un sistema de control tiene la función de transferencia $G_c(s)G(s)$:
+	\begin{equation*}
+		G_c(s)G(s) = \frac{75(s+1)}{s(s+5)(s+25)}
+	\end{equation*}
+	\begin{columns}
+	\begin{column}{0.5\textwidth}
+	El sistema sigue una referencia en forma de diente de sierra como se muestra en la figura.
+	\begin{itemize}
+		\item Determine el error de estado estacionario.
+		\item Realice un bosquejo de la respuesta obtenida.
+	\end{itemize}
+	\end{column}	
+	\begin{column}{0.5\textwidth}
+		\centering
+		\includegraphics[width=6cm]{images/taller1.eps}
+	\end{column}	
+	\end{columns}
+	\seti
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Taller}
+\begin{enumerate}
+	\conti
+	\item Se desea obtener un sistema de control de velocidad que garantice un error de estado estacionario igual a cero ante una entrada rampa. Un sistema de tercer orden es suficiente para lograr éste objetivo.
+	\begin{itemize}
+		\item Determine la función de transferencia óptima $T(s)$ del sistema para un criterio ITAE.
+		\item Estime el tiempo de asentamiento (settling time) para un criterio de 2\% y el porcentaje de sobrepico para una entrada paso cuando $\omega_n = 10$.
+	\end{itemize}
+\end{enumerate}
+\end{frame}
+
+\end{document}
