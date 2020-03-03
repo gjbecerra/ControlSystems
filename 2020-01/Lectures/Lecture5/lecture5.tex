@@ -147,18 +147,18 @@
 \vspace*{5mm}
 \begin{columns}
 \begin{column}{0.5\textwidth}
-Sistema de Segundo Orden con un Polo en $s=-1/\gamma$:
+Sistema de Segundo Orden con un Polo en $s=-z$:
 \begin{equation*}
-	T(s) = \frac{1}{(s^2+2 \zeta \omega_n s + 1)(\gamma s + 1)}
+	T(s) = \frac{1}{(s^2+2 \zeta \omega_n s + 1)(\frac{1}{p}s + 1)}
 \end{equation*}
 Condición para asumir que el efecto del tercer polo sobre los polos dominantes es \textit{despreciable}:
 \begin{equation*}
-	1/\gamma \geq 10 \zeta \omega_n
+	p << \zeta \omega_n
 \end{equation*}
 \end{column}	
 \begin{column}{0.5\textwidth}
 \centering
-\includegraphics[width=7cm]{images/thirdPole.eps}
+\includegraphics[width=7cm]{images/thirdPole_new.eps}
 \end{column}	
 \end{columns}
 \end{frame}
@@ -167,18 +167,18 @@ Condición para asumir que el efecto del tercer polo sobre los polos dominantes 
 \vspace*{5mm}
 \begin{columns}
 \begin{column}{0.5\textwidth}
-Sistema de Segundo Orden con un Cero en $s=-a$: 
+Sistema de Segundo Orden con un Cero en $s=-z$: 
 \begin{equation*}
-	T(s) = \frac{(\omega_n^2/a)(s+a)}{(s^2+2 \zeta \omega_n s + \omega_n^2)}
+	T(s) = \frac{\omega_n^2(\frac{1}{z}s+1)}{(s^2+2 \zeta \omega_n s + \omega_n^2)}
 \end{equation*}
 Condición para asumir que el efecto del cero sobre los polos dominantes es \textit{despreciable}:
 \begin{equation*}
-	a \geq 10 \zeta \omega_n
+	z << \zeta \omega_n
 \end{equation*}
 \end{column}	
 \begin{column}{0.5\textwidth}
 \centering
-\includegraphics[width=6cm]{images/thirdZero.eps}
+\includegraphics[width=7cm]{images/thirdZero_new.eps}
 \end{column}	
 \end{columns}
 \end{frame}

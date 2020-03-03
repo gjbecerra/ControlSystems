@@ -1,4 +1,4 @@
-\documentclass[aspectratio=169,handout]{beamer}
+\documentclass[aspectratio=169]{beamer}
 % \usepackage[utf8]{inputenc}
 \usetheme{metropolis}
 \usecolortheme{orchid}
@@ -574,7 +574,7 @@ Encuentre un sistema de cero error de posición que minimice el criterio ITAE. T
 \vspace*{3mm}
 La función de transferencia óptima a partir de la tabla se selecciona como:
 \begin{equation*}
-	\frac{Y(s)}{R(s)} = G_0 = \frac{\omega_n}{s^2 + 1.4 \omega_n s + \omega_n^2}
+	\frac{Y(s)}{R(s)} = G_0 = \frac{\omega_n^2}{s^2 + 1.4 \omega_n s + \omega_n^2}
 \end{equation*}
 Note que aumentando $\omega_n$, aumentan la velocidad de respuesta y la señal de control. Se debe seleccionar $\omega_n$ tal que $|u(t)| \leq 3$.
 \end{frame}
@@ -595,6 +595,22 @@ Entonces, para satisfacer $|u(t)| \leq 3$ se requiere $\omega_n^2 = 3$. Entonces
 \begin{equation*}
 	\frac{Y(s)}{R(s)} = \frac{3}{s^2 + 1.4 \sqrt{3} s + 3} = \frac{3}{s^2 + 2.4 s + 3} 
 \end{equation*}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Diseño de Controladores usando Coeficientes Óptimos: Ejemplo}
+	Para calcular el controlador óptimo:
+	\begin{align*}
+		\frac{U(s)}{R(s)} = \frac{G_0(s)}{G(s)} = \frac{G_c(s)}{1 + G_c(s)G(s)}\\
+	\end{align*}
+	Despejando $G_c(s)$:
+	\begin{align*}
+		G_c(s)G(s) &= G_0(s) + G_c(s) G(s) G_0(s)\\
+		G_c(s) &= \frac{G_0(s)}{G(s) - G(s)G_0(s)}
+	\end{align*}
+	Reemplazando $G(s)$, $G_0(s)$:
+	\begin{align*}
+		G_c(s) = \frac{3s + 6}{s + 2.425}
+	\end{align*}
 \end{frame}
 
 \section{Taller}
