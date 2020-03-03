@@ -1,0 +1,685 @@
+\documentclass[aspectratio=169,handout]{beamer}
+% \usepackage[utf8]{inputenc}
+\usetheme{metropolis}
+\usecolortheme{orchid}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{multirow}
+\usepackage[ruled]{algorithm2e}
+\usepackage{mathtools}
+\usepackage{caption}
+\usepackage{epstopdf}
+\usepackage{hyperref}
+\setbeamerfont{footnote}{size=\tiny}
+
+\usepackage{tikz}
+\usetikzlibrary{mindmap,shadows,tikzmark,positioning,arrows.meta}
+
+% Information boxes
+\newcommand*{\info}[4][16.3]{%
+  \node [ annotation, #3, scale=0.65, text width = #1em,
+          inner sep = 2mm ] at (#2) {%
+  \list{$\bullet$}{\topsep=0pt\itemsep=0pt\parsep=0pt
+    \parskip=0pt\labelwidth=8pt\leftmargin=8pt
+    \itemindent=0pt\labelsep=2pt}%
+    #4
+  \endlist
+  };
+}
+
+\tikzset{%
+  >={Latex[width=2mm,length=2mm]},
+  % Specifications for style of nodes:
+            base/.style = {rectangle, rounded corners, draw=black,
+                           minimum width=4cm, minimum height=1cm,
+                           text centered, font=\sffamily},
+  activityStarts/.style = {base, fill=blue!30},
+       startstop/.style = {base, fill=red!30},
+    activityRuns/.style = {base, fill=green!30},
+         process/.style = {base, minimum width=2.5cm, fill=orange!15,
+                           font=\ttfamily},
+}
+\renewcommand\textbullet{\ensuremath{\bullet}}
+\newcommand\scalemath[2]{\scalebox{#1}{\mbox{\ensuremath{\displaystyle #2}}}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+%%% Bibliography
+\usepackage[citestyle=numeric,style=numeric,backend=biber,doi=false,isbn=false,url=false]{biblatex}
+\addbibresource{references.bib}
+
+%%% Suppress biblatex annoying warning
+\usepackage{silence}
+\WarningFilter{biblatex}{Patching footnotes failed}
+
+%%% new theorems %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\theoremstyle{definition}
+\newtheorem{mydef}{Definition}
+
+\theoremstyle{plain}
+\newtheorem{mylemma}{Lemma}[section]
+\newtheorem{mytheorem}{Theorem}[section]
+\newtheorem{myproposition}{Proposition}[section]
+\newtheorem{myproblem}{Problem}[section]
+\newtheorem{mydefinition}{Definition}[section]
+\newtheorem{myassumption}{Assumption}[section]
+
+\theoremstyle{remark}
+\newtheorem{myremark}{Remark}[section]
+
+\newcounter{saveenumi}
+\newcommand{\seti}{\setcounter{saveenumi}{\value{enumi}}}
+\newcommand{\conti}{\setcounter{enumi}{\value{saveenumi}}}
+
+\resetcounteronoverlays{saveenumi}
+
+\title{Control de Sistemas}
+\subtitle{\small Clase 7: Sintonización de Controladores}
+\author{Gerardo Becerra, Ph.D.}
+\institute{Pontificia Universidad Javeriana\\ Departamento de Electrónica}
+\date{Marzo 3, 2020}
+
+\begin{document}
+
+\frame{\titlepage}	
+
+% \frame{\tableofcontents}
+
+% \section{Tipos de Control}
+\begin{frame}[<+->]\frametitle{Introducción}
+\vspace*{5mm}
+\centering
+\includegraphics[width=8cm]{images/PIDController.eps}
+\begin{itemize}
+	\item Controlador PID $\rightarrow$ Depende de los parámetros $K_p$, $T_i$, $T_d$.
+	\item \textbf{Sintonización:} Selección de valores numéricos para los parámetros, con base en algún criterio.
+	\item Existen muchos criterios para sintonización de controladores.
+	\begin{itemize}
+		\item Experimentales
+		\item Análisis de la función de transferencia
+		\item Técnicas de optimización
+		\item Lugar geométrico de las raíces
+		\item Compensación en frecuencia
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+\section{Citerios Clásicos de Sintonización}
+\subsection{Método de Ziegler-Nichols}
+\begin{frame}[<+->]\frametitle{Método de Ziegler-Nichols}
+\begin{itemize}
+	\item Método experimental.
+	\item Útil cuando no se conoce un modelo matemático detallado de la planta.
+	\item Está diseñado para proveer un buen rechazo a perturbaciones.
+	\item Produce un sobrepico grande.
+	\item Los parámetros resultantes no necesariamente son óptimos. Se toman como punto de partida para un ajuste fino.
+	\item Dos métodos
+	\begin{enumerate}
+		\item Lazo abierto: Características de la curva de reacción ante entrada paso.
+		\item Lazo cerrado: Aumentar la ganancia proporcional hasta un valor crítico.
+	\end{enumerate}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Método de Ziegler-Nichols / Método 1: Lazo Abierto}
+\small
+\vspace*{-2mm}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\begin{itemize}
+	\item Aplicar entrada paso unitaria al sistema y medir la respuesta (experimental o simulación).
+	\item Si la respuesta tiene forma de $S$, se puede aplicar el método.
+	\item Caracterizar la curva obtenida usando dos parámetros: tiempo muerto $L$ y constante de tiempo $T$.
+	\item Los parámetros se encuentran dibujando una recta tangente al punto de inflexión de la curva en forma de $S$.
+\end{itemize}
+\end{column}	
+\begin{column}{0.5\textwidth}
+\includegraphics[width=6.5cm]{images/zieglerNichols1a.eps}\\
+\vspace*{5mm}
+\includegraphics[width=6.5cm]{images/zieglerNichols1b.eps}
+\end{column}	
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Método de Ziegler-Nichols / Método 1: Lazo Abierto}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\small
+\begin{itemize}
+	\item La función de transferencia $C(s)/U(s)$ se puede aproximar a un sistema de primer orden mas tiempo muerto:
+	\begin{equation*}
+		\frac{C(s)}{U(s)} = \frac{K e^{-Ls}}{Ts + 1}
+	\end{equation*}
+	\item Ziegler y Nichols sugirieron asignar los valores para los parámetros de acuerdo con la siguiente tabla:
+	\begin{table}
+	\begin{tabular}{c|c|c|c}
+		Controlador & $K_p$ & $T_i$ & $T_d$\\
+		\hline
+		P   & $T/L$ & $\infty$ & 0\\
+		PI  & $0.9T/L$ & $L/0.3$ & 0\\
+		PID & $1.2T/L$ & $2L$ & $0.5L$
+	\end{tabular}
+	\end{table}
+\end{itemize}
+\end{column}	
+\begin{column}{0.5\textwidth}
+Note que el controlador PID obtenido por éste método tiene la forma:
+\begin{align*}
+	G_c(s) &= K_p\left( 1 + \frac{1}{T_i s} + T_d s \right)\\
+	&= 1.2\frac{T}{L}\left( 1 + \frac{1}{2Ls} + 0.5 Ls \right)\\
+	&= 0.6T \frac{\left( s + \frac{1}{L} \right)^2}{s}
+\end{align*}
+El controlador PID tiene un polo en el origen y doble cero en $s = -1/L$.
+\end{column}	
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Método de Ziegler-Nichols / Método 2: Lazo Cerrado}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+	\begin{itemize}
+		\item Se inicia configurando $T_i = \infty$ y $T_d = 0$.
+		\item Usando sólo acción proporcional, aumentar $K_p$ desde 0 hasta un valor crítico $K_{cr}$ en el cual la salida presenta oscilaciones sostenidas.
+		\item Si no se obtienen oscilaciones, el método no se puede aplicar.
+		\item A partir del experimento se determinan la ganancia crítica $K_{cr}$ y periodo crítico $P_{cr}$.
+	\end{itemize}	
+\end{column}	
+\begin{column}{0.5\textwidth}
+	\includegraphics[width=6.5cm]{images/zieglerNichols2a.eps}\\
+	\vspace*{5mm}
+	\includegraphics[width=6.5cm]{images/zieglerNichols2b.eps}
+\end{column}	
+\end{columns}
+\end{frame}
+\small
+\begin{frame}[<+->]\frametitle{Método de Ziegler-Nichols / Método 2: Lazo Cerrado}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+	Ziegler y Nichols sugirieron asignar los valores para los parámetros de acuerdo con la siguiente tabla:
+	\footnotesize
+	\begin{table}
+	\begin{tabular}{c|c|c|c}
+		Controlador & $K_p$ & $T_i$ & $T_d$\\
+		\hline
+		P   & $0.5  K_{cr}$ & $\infty$ & 0\\
+		PI  & $0.45 K_{cr}$ & $P_{cr}/1.2$ & 0\\
+		PID & $0.6  K_{cr}$ & $P_{cr}/2$ & $0.125P_{cr}$
+	\end{tabular}
+	\end{table}
+\end{column}	
+\begin{column}{0.5\textwidth}
+\small
+Note que el controlador PID obtenido por el segundo método tiene la forma:
+\begin{align*}
+	G_c(s) &= K_p\left( 1 + \frac{1}{T_i s} + T_d s \right)\\
+	&= 0.6 K_{cr} \left( 1 + \frac{1}{0.5 P_{cr}s} + 0.125 P_{cr}s \right)\\
+	&= 0.075K_{cr}P_{cr} \frac{\left( s + \frac{4}{P_{cr}} \right)^2}{s}
+\end{align*}
+Entonces, el controlador PID tiene un polo en el origen y doble cero en $s = -4/P_{cr}$.
+\end{column}	
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Método de Ziegler-Nichols: Ejemplo}
+Considere el sistema de control mostrado en la figura. Usando el método de Ziegler-Nichols, determine los parámetros del controlador PID tal que se obtenga un sobrepico máximo de aproximadamente 25\%. Si el sobrepico máximo es excesivo, realice un ajuste fino para reducirlo.
+\begin{figure}
+\includegraphics[width=8cm]{images/ejemplo1.eps}
+\end{figure}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Método de Ziegler-Nichols: Ejemplo}
+\begin{itemize}
+	\item Dado que la planta tiene un integrador, se utiliza el segundo método.
+	\item Definiendo $T_i = \infty$ y $T_d = 0$, se obtiene la función de transferencia de lazo cerrado:
+	\begin{equation*}
+		\frac{C(s)}{R(s)} = \frac{K_p}{s(s+1)(s+5) + K_p} = \frac{K_p}{s^3 + 6s^2 + 5s + K_p}
+	\end{equation*}
+	\item El valor crítico de $K_p$ para obtener oscilaciones sostenidas se puede obtener usando el criterio de estabilidad de Routh-Hurwitz para el polinomio característico $q(s) = s^3 + 6s^2 + 5s + K_p = 0$:
+	\begin{columns}
+	\begin{column}{0.4\textwidth}
+		\begin{table}
+		\begin{tabular}{c|cc}
+			$s^3$ & 1 & 5\\
+			$s^2$ & 6 & $K_p$\\
+			$s^1$ & $\frac{30-K_p}{6}$ & \\
+			$s^0$ & $K_p$ & 
+		\end{tabular}
+		\end{table}
+	\end{column}	
+	\begin{column}{0.6\textwidth}
+		\begin{itemize}
+			\item El valor crítico de $K_p$ para obtener oscilaciones sostenidas es $K_{cr} = 30$.
+			\item En éste caso, el polinomio característico es $q(s) = s^3 + 6s^2 + 5s + 30 = 0$.
+		\end{itemize}
+	\end{column}	
+	\end{columns}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Método de Ziegler-Nichols: Ejemplo}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\small
+\begin{itemize}
+	\item Para hallar la frecuencia de la oscilación se substituye $s = j\omega$ en el polinomio característico:
+	\begin{align*}
+		(j\omega)^3 + 6(j\omega)^2 + 5(j\omega) + 30 = 0\\
+		6(5 - \omega^2) + j\omega(5-\omega^2) = 0\\
+		\Rightarrow \omega = \sqrt{5}
+	\end{align*}
+	\item El periodo de oscilación sostenida es:
+	\begin{equation*}
+		P_{cr} = \frac{2\pi}{\omega} = \frac{2\pi}{\sqrt{5}} = 2.8099
+	\end{equation*}
+\end{itemize}
+\end{column}
+\begin{column}{0.5\textwidth}
+\small
+\begin{itemize}
+	\item Usando la tabla para el método 2, se obtienen los valores del controlador PID como:
+	\begin{align*}
+		K_p &= 0.6 K_{cr} = 18\\
+		T_i &= 0.5 P_{cr} = 1.405\\
+		T_d &= 0.125P_{cr} = 0.35124
+	\end{align*}
+	\item La función de transferencia del controlador PID queda:
+	\begin{align*}
+		G_c(s) &= 18 \left( 1 + \frac{1}{1.405s} + 0.35124 s \right)\\
+		&= \frac{6.3223(s+1.4235)^2}{s}
+	\end{align*}
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Método de Ziegler-Nichols: Ejemplo}
+\vspace*{5mm}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+	La respuesta del sistema en lazo cerrado ante una entrada paso es:
+	\begin{figure}
+		\includegraphics[width=7cm]{images/ejemplo1Respuesta.eps}
+	\end{figure}
+\end{column}	
+\pause
+\begin{column}{0.5\textwidth}
+	Sobrepico 60\% approximadamente $\rightarrow$ se require ajustar los parámetros para disminuir el sobrepico:
+	\begin{align*}
+		K_p = 39.42\\
+		T_i = 3.077\\
+		T_d = 0.7692
+	\end{align*}
+\end{column}	
+\end{columns}
+\end{frame}
+
+\subsection{Método de Cohen-Coon}
+\begin{frame}[<+->]\frametitle{Método de Cohen-Coon}
+  \begin{itemize}
+ 		\item Ziegler-Nichols: sensible a la relación $L/T$.
+   	\item Cohen-Coon: Mejora el desempeño cuando el tiempo muerto es comparable a la constante de tiempo.
+  \end{itemize}
+  \begin{table}
+  	\begin{tabular}{c|c|c|c}
+  		Controlador & $K_p$ & $T_i$ & $T_d$\\
+  		\hline
+  		P   & $\frac{T}{K_0 L}\left(1   + \frac{L}{3T} \right)$ & $\infty$ & 0\\
+  		PI  & $\frac{T}{K_0 L}\left(0.9 + \frac{L}{12T} \right)$ & $L \frac{30T+3L}{9T+20L}$ & 0\\
+  		PID & $\frac{T}{K_0 L}\left(\frac{4}{3} + \frac{L}{4T} \right)$ & $L \frac{32T+6L}{13T+8L}$ & $\frac{4TL}{11T+22}$
+  	\end{tabular}
+  \end{table}
+  \begin{equation*}
+  	K_0 = \frac{\Delta c}{\Delta u}
+  \end{equation*}
+\end{frame}
+
+\section{Análisis de la Función de Transferencia}
+\begin{frame}[<+->]\frametitle{Método Matemático de Sintonización de Controladores}
+\begin{enumerate}
+	\item A partir de los requerimientos de desempeño, se determina un polinomio característico deseado.
+	\item Se calcula la función de transferencia del sistema en lazo cerrado, en términos de los parámetros del controlador.
+	\item Se comparan el polinomio característico deseado con el denominador de la función de transferencia. Si hay correspondencia en los coeficientes, se resuelve el sistema de ecuaciones para calcular los valores de los parámetros del controlador. Si no, se prueba con un controlador con una estructura diferente.
+	\item Se verifica que el sistema en lazo cerrado cumpla con los requerimientos de desempeño.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Método Matemático: Ejemplo}
+Considere el modelo de segundo orden de un sistema de control de altitud de una aeronave descrito por la función de transferencia:
+\begin{equation*}
+	G(s) = \frac{4500}{s(s+361.2)}
+\end{equation*}
+Se establecen las especificaciones de desempeño como sigue:
+\begin{itemize}
+	\item Error en estado estable debido a una rampa $e_{ss} \leq 0.000433$.
+	\item Sobrepico máximo $PO \leq 5\%$
+	\item Tiempo de subida $t_r \leq 0.005$ s.
+	\item Tiempo de establecimiento $t_s \leq 0.005$ s.
+\end{itemize}
+Determine una estructura de control PID adecuada y calcule los valores de los parámetros.
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Método Matemático: Ejemplo}
+\begin{enumerate}
+	\item Polinomio característico deseado a partir de los requerimientos de desempeño.
+	\begin{equation*}
+		PO = 0.05 = e^{-\zeta \pi / \sqrt{1-\zeta^2}}
+	\end{equation*}
+	\begin{equation*}
+		\zeta = 0.6901
+	\end{equation*}
+	Entonces, para $PO \leq 5\%$, $\zeta \geq 0.6901$. Ahora, con $t_s \leq 0.005$:
+	\begin{equation*}
+		\frac{4}{\zeta \omega_n} \leq 0.005 \hspace*{3mm} \Rightarrow \hspace*{3mm} \omega_n \geq \frac{4}{0.005\zeta}
+	\end{equation*}
+	Para $\zeta = 0.6901$, $\omega_n = 1159.2$. Entonces el polinomio característico deseado es:
+	\begin{equation*}
+		q(s) = s^2 + 2 \zeta \omega_n s + \omega_n^2 = s^2 + 2(0.6901)(1159.2)s + 1159.2^2 = s^2 + 1600s +1.3737\times 10^6
+	\end{equation*}
+	\seti
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Método Matemático: Ejemplo}
+\begin{enumerate}
+	\conti
+	\item Función de transferencia en lazo cerrado en términos de los parámetros del controlador.\\
+	Qué estructura debe tener el controlador? Usando controlador P:
+	\begin{equation*}
+		\frac{Y(s)}{R(s)} = \frac{K_p\frac{4500}{s(s+361.2)}}{1 + K_p\frac{4500}{s(s+361.2)}} = \frac{4500 K_p}{s^2 + 361.2s + 4500K_p}
+	\end{equation*}
+	Comparando el denominador con el polinomio característico deseado: 
+	\begin{equation*}
+		q(s) = s^2 + 1600s +1.3737\times 10^6
+	\end{equation*}
+	No hay correspondencia en el coeficiente de $s$! Entonces, no funciona utilizar el controlador P. Se debe probar con un controlador diferente.
+	\seti
+\end{enumerate}	
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Método Matemático: Ejemplo}
+	Usando un controlador PD:
+	\begin{equation*}
+		\frac{Y(s)}{R(s)} = \frac{(K_p + K_ds)\frac{4500}{s(s+361.2)}}{1 + (K_p + K_ds)\frac{4500}{s(s+361.2)}} = \frac{4500 (K_p + K_ds)}{s^2 + (361.2+4500K_d)s + 4500K_p}
+	\end{equation*}
+	Al agregar el controlador D, se tiene un nuevo grado de libertad para ajustar el coeficiente de $s$. Comparando con el polinomio característico deseado:
+	\begin{equation*}
+		q(s) = s^2 + 1600s + 1.3737\times 10^6
+	\end{equation*}
+	Ahora si se puede resover el sistema de ecuaciones.
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Método Matemático: Ejemplo}
+\begin{enumerate}
+	\conti
+	\item Comparando los coeficientes de los dos polinomios:
+	\begin{align*}
+		&s^2 + (361.2+4500K_d)s + 4500K_p\\
+		&s^2 + 1600s +1.3737\times 10^6
+	\end{align*}
+	Se tiene el sistema de ecuaciones
+	\begin{align*}
+		4500K_p = 1.3737\times 10^6\\
+		361.2+4500K_d = 1600
+	\end{align*}
+	Entonces:
+	\begin{align*}
+		K_p = 298.6099\\
+		K_d = 0.2753
+	\end{align*}
+	\seti
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Método Matemático: Ejemplo}
+	\begin{enumerate}
+		\conti
+		\item Verificar que se cumplan los requerimientos de desempeño.\\
+		\vspace*{5mm}
+		Se puede usar una simulación para verificarlo...
+	\end{enumerate}
+\end{frame}
+
+\section{Sintonía Óptima de Controladores}
+\subsection{Índices de Desempeño}
+\begin{frame}[<+->]\frametitle{Índices de Desempeño}
+	\textbf{Sistema de control óptimo:} los parámetros del sistema se ajustan para minimizar (maximizar) un índice de desempeño.
+	\begin{columns}
+	\begin{column}{0.5\textwidth}
+	\begin{itemize}
+		\item Integral del cuadrado del error (ISE):
+		\begin{equation*}
+			ISE = \int_0^T e^2(t) dt
+		\end{equation*}
+		\item Integral del valor absoluto del error (IAE):
+		\begin{equation*}
+			IAE = \int_0^T |e(t)| dt
+		\end{equation*}
+	\end{itemize}
+	\end{column}	
+	\begin{column}{0.5\textwidth}
+	\begin{itemize}
+		\item Integral del valor absoluto del error ponderado en el tiempo (ITAE):
+		\begin{equation*}
+			ITAE = \int_0^T t |e(t)| dt
+		\end{equation*}
+		\item Integral del cuadrado del error ponderado en el tiempo (ITSE):
+		\begin{equation*}
+			ITAE = \int_0^T t e^2(t) dt
+		\end{equation*}
+	\end{itemize}
+	\end{column}	
+	\end{columns}
+	\vspace*{-5mm}
+	\pause
+	$T$: Es conveniente seleccionarlo como el tiempo de establecimiento $T_s$.\\
+	\pause
+	\textbf{Objetivo:} seleccionar parámetros del sistema para minimizar algún índice de desempeño.
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Índices de Desempeño}
+	\begin{itemize}
+		\item ISE: otorga más peso a errores grandes, lo cual usualmente ocurre al inicio de la respuesta, y menos peso a errores pequeños, lo cual ocurre normalmente hacia el final de la respuesta.
+		\item ISE: produce ganancias del controlador grandes y respuestas muy oscilatorias.
+		\item ITAE, ITSE: agrega un término de penalización asociado al tiempo transcurrido.
+		\item Lopez et al [1967] desarrollaron fórmulas empíricas de mínimo error integral.
+		\item Aplicables para el intervalo $0.1 < L/T < 1$.
+	\end{itemize}
+\end{frame}
+
+\subsection{Sintonización Óptima para Controladores PID}
+\begin{frame}[<+->]\frametitle{Sintonización Óptima para Regulación - Controlador P}
+\begin{figure}
+	\includegraphics[width=9cm]{images/criteriosOptimosP.eps}
+\end{figure}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Sintonización Óptima para Regulación - Controlador PI}
+\begin{figure}
+	\includegraphics[width=9cm]{images/criteriosOptimosPI.eps}
+\end{figure}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Sintonización Óptima para Regulación - Controlador PID}
+\begin{figure}
+	\includegraphics[width=9cm]{images/criteriosOptimosPID.eps}
+\end{figure}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Sintonización Óptima para Servos - Controlador PI}
+\begin{figure}
+	\includegraphics[width=9cm]{images/criteriosOptimosServoPI.eps}
+\end{figure}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Sintonización Óptima para Servos - Controlador PID}
+\begin{figure}
+	\includegraphics[width=8cm]{images/criteriosOptimosServoPID.eps}
+\end{figure}
+\end{frame}
+
+\subsection{Sintonización Óptima para un Controlador General}
+\begin{frame}[<+->]\frametitle{Coeficientes Óptimos Basados en el Criterio ITAE para una Entrada Paso}
+\begin{itemize}
+	\item Para la función de transferencia de lazo cerrado de la forma general:
+	\begin{equation*}
+		T(s) = \frac{Y(s)}{R(s)} = \frac{b_0}{s^n + b_{n-1} s^{n-1} + \dots + b_1 s + b0}
+	\end{equation*}
+	se han determinado los coeficientes óptimos que minimizan el ITAE para una entrada paso.
+	\item Ésta función de transferencia tiene $e_{ss} = 0$ para entrada paso.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Coeficientes Óptimos Basados en el Criterio ITAE para una Entrada Paso}
+\centering
+\begin{equation*}
+	T(s) = \frac{Y(s)}{R(s)} = \frac{b_0}{s^n + b_{n-1} s^{n-1} + \dots + b_1 s + b0}
+\end{equation*}
+\vspace*{10mm}
+\includegraphics[width=10cm]{images/optimCoeffsITAEstep.eps}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Coeficientes Óptimos Basados en el Criterio ITAE para una Entrada Rampa}
+\centering
+\begin{equation*}
+	T(s) = \frac{Y(s)}{R(s)} = \frac{b_1s + b_0}{s^n + b_{n-1} s^{n-1} + \dots + b_1 s + b0}
+\end{equation*}
+\vspace*{10mm}
+\includegraphics[width=8cm]{images/optimCoeffsITAEramp.eps} 
+\end{frame}
+
+\begin{frame}[c]\frametitle{Respuesta Paso para Coeficientes Óptimos Basados en Criterio IAE}
+\vspace*{5mm}
+\centering
+\includegraphics[width=8cm]{images/stepResponseOptimIAE.eps}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Respuesta Paso para Coeficientes Óptimos Basados en Criterio ITAE}
+\vspace*{5mm}
+\centering
+\includegraphics[width=8cm]{images/stepResponseOptimITAE.eps}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Respuesta Paso para Coeficientes Óptimos Basados en Criterio ISE}
+\vspace*{5mm}
+\centering
+\includegraphics[width=8cm]{images/stepResponseOptimISE.eps}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Diseño de Controladores usando Coeficientes Óptimos: Ejemplo}
+Considere el sistema
+\begin{equation*}
+	G(s) = \frac{1}{s(s+2)}
+\end{equation*}
+Encuentre un sistema de cero error de posición que minimice el criterio ITAE. También se requiere que la señal de control debida a una señal escalón unitario satisfaga $|u(t)| \leq 3$.\\
+\vspace*{3mm}
+La función de transferencia óptima a partir de la tabla se selecciona como:
+\begin{equation*}
+	\frac{Y(s)}{R(s)} = G_0 = \frac{\omega_n}{s^2 + 1.4 \omega_n s + \omega_n^2}
+\end{equation*}
+Note que aumentando $\omega_n$, aumentan la velocidad de respuesta y la señal de control. Se debe seleccionar $\omega_n$ tal que $|u(t)| \leq 3$.
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Diseño de Controladores usando Coeficientes Óptimos: Ejemplo}
+La función de transferencia desde $R(s)$ hasta $U(s)$ es
+\begin{equation*}
+	\frac{U(s)}{R(s)} = \frac{G_0(s)}{G(s)} = \frac{\omega_n^2 s (s+2)}{s^2 + 1.4 \omega_n s + \omega_n^2}
+\end{equation*}
+\begin{equation*}
+	U(s) = \frac{\omega_n^2 s (s+2)}{s^2 + 1.4 \omega_n s + \omega_n^2} R(s)
+\end{equation*}
+Usando simulación, se encuentra que el máximo valor de $u(t)$ ocurre en $t = 0^+$. Para encontrar dicho valor se usa el teorema del valor inicial:
+\begin{equation*}
+	u_{max} = u(0^+) = \lim_{s \rightarrow \infty} s U(s) = \lim_{s \rightarrow \infty} s \frac{\omega_n^2 s (s+2)}{s^2 + 1.4 \omega_n s + \omega_n^2} \frac{1}{s} = \omega_n^2
+\end{equation*}
+Entonces, para satisfacer $|u(t)| \leq 3$ se requiere $\omega_n^2 = 3$. Entonces el sistema ITAE óptimo es:
+\begin{equation*}
+	\frac{Y(s)}{R(s)} = \frac{3}{s^2 + 1.4 \sqrt{3} s + 3} = \frac{3}{s^2 + 2.4 s + 3} 
+\end{equation*}
+\end{frame}
+
+\section{Taller}
+\begin{frame}[c]\frametitle{Taller}
+	\begin{enumerate}
+		\item Considere el sistema de control mostrado en la figura.
+		\begin{itemize}
+			\item Diseñe un controlador PID usando el método de Ziegler-Nichols.
+			\item Determine la respuesta a entrada unitaria y disturbio unitario.
+			\item Cuál es el máximo sobrepico y tiempo de establecimiento para la respuesta a entrada unitaria?
+		\end{itemize}
+		\seti
+	\end{enumerate}
+	\begin{figure}
+		\includegraphics[width=10cm]{images/ejercicio1.eps}
+	\end{figure}
+\end{frame}
+ 
+\begin{frame}[c]\frametitle{Taller}
+	\begin{enumerate}
+		\conti
+		\item La siguiente figura muestra la curva de reacción obtenida al aplicar una entrada paso al sistema $G(s) = \frac{1}{(s+1)^4}$.
+		\vspace*{-5mm}
+		\begin{columns}
+		\begin{column}{0.5\textwidth}
+		\begin{figure}
+			\includegraphics[width=7cm]{images/responseCurve.eps}
+		\end{figure}
+		\end{column}	
+		\begin{column}{0.5\textwidth}
+		\begin{itemize}
+			\item Encuentre una aproximación de primer orden mas tiempo muerto (FOPDT) para el sistema.
+			\item Diseñe un controlador PID usando los métodos de Ziegler-Nichols, Cohen-Coon e ITAE.
+			\item Compare los valores de los parámetros obtenidos en cada caso.
+			\item Evalue el desempeño de cada controlador ante entrada paso unitario y disturbio paso unitario.
+		\end{itemize}
+		\end{column}	
+		\end{columns}
+		\seti
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Taller}
+\begin{enumerate}
+	\conti
+	\item Considere el sistema descrito por
+		\begin{equation*}
+			G(s) = \frac{2}{s^2 + 0.03s + 2.25}
+		\end{equation*}
+		Diseñe un controlador tal que el sistema tenga
+		\begin{enumerate}
+			\item Error en estado estable nulo ante escalón unitario.
+			\item Sobrepico $\leq 10\%$ .
+			\item Tiempo de establecimiento $t_s \leq 10$ s.
+		\end{enumerate}
+	\seti 
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Taller}
+\begin{enumerate}
+	\conti
+	\item Considere una planta con función de transferencia $2/s^2$. Encuentre un sistema óptimo que minimice el criterio ITAE bajo la restricción $|u(t)| \leq 3$.
+	\seti
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Taller}
+\begin{enumerate}
+	\conti
+	\item Considere una planta con función de transferencia $2/s^2$. Encuentre un sistema óptimo que minimice el criterio ITAE bajo la restricción $|u(t)| \leq 3$ y que el error de velocidad sea cero.
+	\seti
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Taller}
+\begin{enumerate}
+	\conti
+	\item Considere una planta cuya función de transferencia es
+		\begin{equation*}
+			G(s) = \frac{2}{s(s^2 + 0.25s + 6.25)}
+		\end{equation*}
+		Encuentre un sistema óptimo ITAE de error de posición cero. Se requiere que la señal de control $u(t)$ debida a una señal de entrada escalón unitario satisfaga $|u(t)| \leq 10$.
+	\seti
+\end{enumerate}
+\end{frame}
+
+\end{document}
