@@ -31,7 +31,7 @@ pinstyle/.style = {pin edge={to-,thin,black}
 \begin{document}
 	\maketitle
 		\begin{description}
-			\item 1. El sistema de control de posición de la plataforma de una aeronave está governada por las siguientes ecuaciones:
+			\item [1.] El sistema de control de posición de la plataforma de una aeronave está governada por las siguientes ecuaciones:
 			\begin{align}
 				\frac{d^2p(t)}{dt^2} + 2 \frac{dp(t)}{dt} + 4p(t) = \theta(t)\\
 				\frac{d\theta(t)}{dt} = 0.5v_2(t)\\
@@ -47,7 +47,7 @@ pinstyle/.style = {pin edge={to-,thin,black}
 				\item $\theta(t)$: posición del eje del motor.
 			\end{itemize}
 			\begin{description}
-				\item a. Obtenga el diagrama de bloques del sistema, identificando claramente todos los elementos (subsistemas, señales, etc).\\
+				\item [a. (8 puntos)] Obtenga el diagrama de bloques del sistema, identificando claramente todos los elementos (subsistemas, señales, etc).\\
 				% \vspace*{3mm}
 				Usando la notación de punto para representar las derivadas respecto al tiempo, se reescriben las ecuaciones de la siguiente forma:
 				\begin{subequations}
@@ -96,7 +96,7 @@ pinstyle/.style = {pin edge={to-,thin,black}
 					\label{fig:prob1_diagbloques}
 				\end{figure}
 
-				\item b. Obtenga la representación en variables de estado del sistema.\\
+				\item [b. (7 puntos)] Obtenga la representación en variables de estado del sistema.\\
 				Para encontrar la representación en variables de estado, se realiza un cambio de variable:
 				\begin{align*}
 					x_1(t) &= p(t) \Rightarrow \dot{x}_1(t) = \dot{p}(t)\\
@@ -128,15 +128,15 @@ pinstyle/.style = {pin edge={to-,thin,black}
 				\end{equation*}
 			\end{description}
 			
-			\item 2. Un sistema de control con retroalimentación negativa unitaria posee la siguiente función de lazo abierto:
+			\item [2.] Un sistema de control con retroalimentación negativa unitaria posee la siguiente función de lazo abierto:
 			\begin{equation*}
 				G_c(s)G(s) = \frac{K}{s(s+\sqrt{2K})}
 			\end{equation*}
 			\begin{description}
-				\item a. Determine el porcentaje de sobrepico y tiempo de establecimiento (criterio de 2\%) de la respuesta debida a una entrada paso unitaria.\\
+				\item [a. (8 puntos)] Determine el porcentaje de sobrepico y tiempo de establecimiento (criterio de 2\%) de la respuesta debida a una entrada paso unitaria.\\
 				La función de transferencia de lazo cerrado es:
 				\begin{equation*}
-					G_{cl}(s) = \frac{\frac{K}{s^2+\sqrt{2K}s}}{1+\frac{K}{s^2+\sqrt{2K}s}} = \frac{K}{s^2+\sqrt{2K}+K}
+					G_{cl}(s) = \frac{\frac{K}{s^2+\sqrt{2K}s}}{1+\frac{K}{s^2+\sqrt{2K}s}} = \frac{K}{s^2+\sqrt{2K}s+K}
 				\end{equation*}
 				Note que la función de lazo abierto tiene la forma ideal de un sistema de segundo orden:
 				\begin{equation*}
@@ -156,24 +156,24 @@ pinstyle/.style = {pin edge={to-,thin,black}
 					T_s = \frac{4}{\zeta \omega_n} = \frac{4}{\frac{\sqrt{2}}{2}\sqrt{K}} = \frac{4\sqrt{2}}{\sqrt{K}}
 				\end{equation*}
 
-				\item b. Para qué rango de $K$ se tiene $T_s \leq 1$ s?\\
+				\item [b. (7 puntos)] Para qué rango de $K$ se tiene $T_s \leq 1$ s?\\
 				\begin{equation*}
 					T_s \leq 1 \Rightarrow \frac{4\sqrt{2}}{\sqrt{K}} \leq 1 \Rightarrow 4\sqrt{2} \leq \sqrt{K} \Rightarrow K \geq 32
 				\end{equation*}
 			\end{description}
 			
-			\item 3. Considere el sistema mostrado en la Fig. \ref{fig:blockDiagram}(a).
+			\item [3.] Considere el sistema mostrado en la Fig. \ref{fig:blockDiagram}(a).
 			\begin{description}
-				\item a. Determine $G(s)$ y $H(s)$ del diagrama de bloques mostrado en la Fig. \ref{fig:blockDiagram}(b) que son equivalentes a los del diagrama de la Fig. \ref{fig:blockDiagram}(a).\\
+				\item [a. (8 puntos)] Determine $G(s)$ y $H(s)$ del diagrama de bloques mostrado en la Fig. \ref{fig:blockDiagram}(b) que son equivalentes a los del diagrama de la Fig. \ref{fig:blockDiagram}(a).\\
 				Para simplificar el diagrama de bloques la señal que se realimenta unitariamente en la primera suma se puede mover a $Y(s)$. En ese caso el diagrama queda como el mostrado en la Fig. \ref{fig:blockDiagramSimplification}(a). Luego, utilizando operaciones fundamentales se simplifica la realimentación en \ref{fig:blockDiagramSimplification}(b) y se obtiene la cascada en \ref{fig:blockDiagramSimplification}(c). Por lo tanto, se tiene que
 				\begin{equation*}
-					G(s) = \frac{1}{(s+5)(s+11)}, \hspace*{3mm} H(s) = s+10
+					G(s) = \frac{1}{s^2+16s+55}, \hspace*{3mm} H(s) = s+10
 				\end{equation*}
 
-				\item b. Determine $Y(s)/R(s)$ para la Fig. \ref{fig:blockDiagram}(b).\\
+				\item [b. (7 puntos)] Determine $Y(s)/R(s)$ para la Fig. \ref{fig:blockDiagram}(b).\\
 				La función de transferencia total se obtiene como:
 				\begin{align*}
-					\frac{Y(s)}{R(s)} &= \frac{G(s)}{1+G(s)H(s)} = \frac{\frac{1}{(s+5)(s+11)}}{1+\frac{(s+10)}{(s+5)(s+11)}} = \frac{1}{(s+5)(s+11)+(s+10)}\\
+					\frac{Y(s)}{R(s)} &= \frac{G(s)}{1+G(s)H(s)} = \frac{\frac{1}{s^2+16s+55}}{1+\frac{s+10}{s^2+16s+55}} = \frac{1}{s^2+16s+55+s+10}\\
 					&= \frac{1}{s^2+17s+65}
 				\end{align*}
 
@@ -256,7 +256,7 @@ pinstyle/.style = {pin edge={to-,thin,black}
 				\begin{tikzpicture}[auto, node distance=2.5cm,>=latex']
 					\node[input, name=rinput] (rinput) {};
 					\node[sum, right of=rinput] (sum1) {};
-					\node[block, right of=sum1,node distance=2cm] (sys1) {$\frac{1}{(s+5)(s+11)}$};
+					\node[block, right of=sum1,node distance=2cm] (sys1) {$\frac{1}{s^2+16s+55}$};
 					\node[block, below of=sys1, node distance=2cm] (sys3) {$s+10$};
 					\node[output, right of=sys1] (output) {};
 					\draw[->,line width=0.5mm] (rinput) -- node[anchor=south]{$R(s)$} (sum1);
@@ -270,7 +270,7 @@ pinstyle/.style = {pin edge={to-,thin,black}
 				\label{fig:blockDiagramSimplification}
 			\end{figure}
 
-			\item 4. Considere el sistema de control con retroalimentación negativa unitaria que posee la siguiente función de transferencia de lazo abierto:
+			\item [4. (15 puntos)] Considere el sistema de control con retroalimentación negativa unitaria que posee la siguiente función de transferencia de lazo abierto:
 			\begin{equation*}
 				G_c(s)G(s) = \frac{K(s+1)(s+3)}{s(s-1)(s+2)}
 			\end{equation*}
@@ -289,7 +289,6 @@ pinstyle/.style = {pin edge={to-,thin,black}
 				\begin{tabular}{c|cc}
 					$s^3$ & $1$ & $4K-2$\\
 					$s^2$ & $K+1$ & $3K$\\
-					$s^1$	& $a_1$\\
 					$s^0$ & $a_0$
 				\end{tabular}
 			\end{table}
@@ -309,7 +308,7 @@ pinstyle/.style = {pin edge={to-,thin,black}
 			\begin{equation*}
 					\left\{1,\hspace*{2mm} K+1,\hspace*{2mm} \frac{4K^2-K-2}{K+1},\hspace*{2mm} 3K\right\}
 			\end{equation*}
-			Note que el primer valor es positivo, por lo que debemos buscar condiciones para que también lo sean. Del segundo valor se tiene la condición $K+1 > 0 \Rightarrow K>-1$. Para analizar el tercer valor se busca encontrar los valores críticos de $K$ tal que
+			Note que el primer valor es positivo, por lo que debemos buscar condiciones para que los demás valores también lo sean. Del segundo valor se tiene la condición $K+1 > 0 \Rightarrow K>-1$. Para analizar el tercer valor se busca encontrar los valores críticos de $K$ tal que
 			\begin{equation*}
 				\frac{4K^2-K-2}{K+1} = 0\hspace*{3mm} \Rightarrow\hspace*{3mm} 4K^2-K-2=0\hspace*{3mm} \Rightarrow\hspace*{3mm} K = {0.8431, -0.5931}
 			\end{equation*}
@@ -326,13 +325,13 @@ pinstyle/.style = {pin edge={to-,thin,black}
 			Note de nuevo que al disminuir un poco el valor de K, se obtienen un valor negativo, mientras que al aumentarlo se mantienen todos positivos. Por lo tanto, la condición para que el sistema sea estable es $K > 0.8431$.
 
 
-			\item 5. Considere el sistema de lazo cerrado de la Fig. \ref{fig:steadyState}, donde
+			\item [5.] Considere el sistema de lazo cerrado de la Fig. \ref{fig:steadyState}, donde
 			\begin{equation*}
 				G(s) = \frac{1}{s+10}, \hspace*{3mm} H(s) = \frac{14}{s^2+5s+6}
 			\end{equation*}
 			\begin{description}
-				\item a. Calcule el valor del error en estado estacionario ante una referencia paso unitaria $R(s) = 1/s$.\\
-				Para calcular el error de estado estacionario, primero se debe obtener la función de transferencia desde $R(s)$ hasta $E(s)$:
+				\item [a. (8 puntos)] Calcule el valor del error en estado estacionario ante una referencia paso unitaria $R(s) = 1/s$.\\
+				Para calcular el error de estado estacionario, primero se debe obtener la función de transferencia desde $R(s)$ hasta $E(s)$ considerando $T_d(s)=0$:
 				\begin{align*}
 					E(s) = R(s) - H(s)Y(s) = R(s) - G(s)H(s)E(s)\\
 					E(s)\left( 1 + G(s)H(s) \right) = R(s)\\
@@ -347,10 +346,10 @@ pinstyle/.style = {pin edge={to-,thin,black}
 					e_{ss} = \lim_{s \rightarrow 0}sE(s) = \lim_{s \rightarrow 0} s \frac{s^3+15s^2+56s+60}{s^3+15s^2+56s+74}\frac{1}{s} = \frac{60}{74} = 0.81081
 				\end{equation*}
 
-				\item b. Calcule el valor de la salida en estado estacionario ante un disturbio paso unitario $T_d(s) = 1/s$.\\
-				Ahora, para calcular la función de transferencia desde el disturbio hasta la salida:
+				\item [b. (7 puntos)] Calcule el valor de la salida en estado estacionario ante un disturbio paso unitario $T_d(s) = 1/s$.\\
+				Ahora, para calcular la función de transferencia desde el disturbio hasta la salida, considerando $R(s) = 0$:
 				\begin{align*}
-					Y(s) = T_d(s) + G(s)H(s)Y(s)a\\
+					Y(s) = T_d(s) + G(s)H(s)Y(s)\\
 					Y(s) \left( 1 - G(s)H(s) \right) = T_d(s)\\
 					Y(s) = \frac{1}{1-G(s)H(s)}T_d(s)
 				\end{align*}
@@ -386,7 +385,7 @@ pinstyle/.style = {pin edge={to-,thin,black}
 				\label{fig:steadyState}
 			\end{figure}
 
-			\item 6. Considere el sistema mostrado en la Fig. \ref{fig:itaeSystem}. Encuentre el valor de K tal que el sistema en lazo cerrado minimice el criterio de desempeño ITAE ante una entrada paso unitaria.\\
+			\item [6. (10 puntos)] Considere el sistema mostrado en la Fig. \ref{fig:itaeSystem}. Encuentre el valor de K tal que el sistema en lazo cerrado minimice el criterio de desempeño ITAE ante una entrada paso unitaria.\\
 
 			Calculando la función de transferencia de lazo cerrado:
 			\begin{equation*}
@@ -423,7 +422,7 @@ pinstyle/.style = {pin edge={to-,thin,black}
 				\label{fig:itaeSystem}
 			\end{figure}
 
-			\item 7. Considere el sistema mostrado en la Fig. \ref{fig:pidControl}. Se desea diseñar un control que disminuya el efecto de las perturbaciones $D(s)$. Diseñe un sistema de control tal que la respuesta a disturbio paso unitario desaparezca en menos de 3 s, con una oscilación cuya frecuencia natural sea $\omega_n = 4$ rad/s. Utilice una aproximación de polos dominantes.\\
+			\item [7. (15 puntos)] Considere el sistema mostrado en la Fig. \ref{fig:pidControl}. Se desea diseñar un control que disminuya el efecto de las perturbaciones $D(s)$. Diseñe un sistema de control tal que la respuesta a disturbio paso unitario desaparezca en menos de 3 s, con una oscilación cuya frecuencia natural sea $\omega_n = 4$ rad/s. Utilice una aproximación de polos dominantes.\\
 
 			El controlador PID tiene la función de transferencia
 			\begin{equation*}
