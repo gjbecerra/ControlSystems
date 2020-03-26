@@ -84,7 +84,7 @@ pinstyle/.style = {pin edge={to-,thin,black}
 						\draw[->,line width=0.5mm] (sum2) -- node[name=pddot,anchor=south] {$\ddot{p}$} (pddotint);
 						\draw[->,line width=0.5mm] (pddotint) -- node[name=pdot,anchor=south] {$\dot{p}$} (pdotint);
 						\draw[line width=0.5mm] (pdotint) -- node[name=p,anchor=south] {$p$} (tmp1);
-						\draw[line width=0.5mm] (tmp1) -| node[pos=0.9] {$-$} (sum1);
+						\draw[->,line width=0.5mm] (tmp1) -| node[pos=0.9] {$-$} (sum1);
 						\draw[->,line width=0.5mm] (output) -- (sum2);
 						\draw[->,line width=0.5mm] (pdot) |- (gain1);
 						\draw[->,line width=0.5mm] (gain1) -| node[pos=0.9] {$-$} (sum2);
