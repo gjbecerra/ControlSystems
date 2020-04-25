@@ -1,0 +1,710 @@
+\documentclass[aspectratio=169]{beamer}
+% \usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usetheme{metropolis}
+\usecolortheme{orchid}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{multirow}
+\usepackage[ruled]{algorithm2e}
+\usepackage{mathtools}
+\usepackage{caption}
+% \usepackage{epstopdf}
+\usepackage{hyperref}
+\usepackage{subcaption}
+\usepackage{siunitx}
+\usepackage{textcomp}
+\usepackage{tcolorbox}
+\usepackage[framed,numbered]{matlab-prettifier}
+
+\newfontfamily{\lstubuntumono}{Ubuntu Mono}
+\lstset{
+  style              = Matlab-editor,
+  basicstyle				 =\lstubuntumono\tiny,
+  escapechar         = ",
+  mlshowsectionrules = false,
+}
+ 
+\usepackage{tikz}
+\usetikzlibrary{tikzmark,positioning,arrows.meta,shapes.misc,calc}
+
+\setbeamerfont{footnote}{size=\tiny}
+
+% Information boxes
+\newcommand*{\info}[4][16.3]{%
+  \node [ annotation, #3, scale=0.65, text width = #1em,
+          inner sep = 2mm ] at (#2) {%
+  \list{$\bullet$}{\topsep=0pt\itemsep=0pt\parsep=0pt
+    \parskip=0pt\labelwidth=8pt\leftmargin=8pt
+    \itemindent=0pt\labelsep=2pt}%
+    #4
+  \endlist
+  };
+}
+
+%% Definitions for root locus plots
+\newcommand*{\rootlocusexample}[4]{% xmin,xmax,ymin,ymax,
+		\foreach \x in {#1,...,#2}{
+			\ifthenelse{\x=0}{}
+		  {% false case
+   			\draw (\x cm,1pt) -- (\x cm,-1pt) node[anchor=north] {$\x$};
+		  }
+		}
+		\foreach \y in {#3,...,#4}{
+			\ifthenelse{\y=0}{}
+		  {% false case
+   			\draw (-1pt,\y cm) -- (1pt,\y cm) node[anchor=east] {$\y$};
+		  }
+   	}
+		\draw [-latex] (#1,0) -- (#2,0) node [above]  {$\sigma$};
+		\draw [-latex] (0,#3) -- (0,#4) node [right] {$j\omega$};
+}
+
+\def\centerarc[#1](#2)(#3:#4:#5)% Syntax: [draw options] (center) (initial angle:final angle:radius)
+    { \draw[#1] ($(#2)+({#5*cos(#3)},{#5*sin(#3)})$) arc (#3:#4:#5); }
+
+\tikzset{%
+  >={Latex[width=2mm,length=2mm]},
+  % Specifications for style of nodes:
+            base/.style = {rectangle, rounded corners, draw=black,
+                           minimum width=4cm, minimum height=1cm,
+                           text centered, font=\sffamily},
+  activityStarts/.style = {base, fill=blue!30},
+       startstop/.style = {base, fill=red!30},
+    activityRuns/.style = {base, fill=green!30},
+         process/.style = {base, minimum width=2.5cm, fill=orange!15,
+                           font=\ttfamily},
+}
+
+\tikzset{pole/.style={cross out, draw=black, minimum size=2*(#1-\pgflinewidth), inner sep=0pt, outer sep=0pt},
+pole/.default={3pt}}
+\tikzset{poledes/.style={rectangle, draw=black, minimum size=2*(#1-\pgflinewidth), inner sep=0pt, outer sep=0pt},
+poledes/.default={3pt}}
+\tikzset{zero/.style={circle, draw=black, fill=white, minimum size=2*(#1-\pgflinewidth), inner sep=0pt, outer sep=0pt},
+zero/.default={3pt}}
+\tikzset{test/.style={rectangle, draw=black, fill=white, minimum size=2*(#1-\pgflinewidth), inner sep=0pt, outer sep=0pt},
+test/.default={3pt}}
+
+%% Definitions for block diagrams
+\tikzstyle{block} = [draw, fill=blue!20, rectangle, 
+    minimum height=2em, minimum width=3em]
+\tikzstyle{sum} = [draw, fill=blue!20, circle, node distance=1cm]
+\tikzstyle{input} = [coordinate]
+\tikzstyle{output} = [coordinate]
+\tikzstyle{pinstyle} = [pin edge={to-,thin,black}]
+
+\renewcommand\textbullet{\ensuremath{\bullet}}
+\newcommand\scalemath[2]{\scalebox{#1}{\mbox{\ensuremath{\displaystyle #2}}}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+%%% Bibliography
+\usepackage[citestyle=numeric,style=numeric,backend=biber,doi=false,isbn=false,url=false]{biblatex}
+\addbibresource{references.bib}
+
+%%% Suppress biblatex annoying warning
+\usepackage{silence}
+\WarningFilter{biblatex}{Patching footnotes failed}
+
+%%% new theorems %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\theoremstyle{definition}
+\newtheorem{mydef}{Definition}
+
+\theoremstyle{plain}
+\newtheorem{mylemma}{Lemma}[section]
+\newtheorem{mytheorem}{Theorem}[section]
+\newtheorem{myproposition}{Proposition}[section]
+\newtheorem{myproblem}{Problem}[section]
+\newtheorem{mydefinition}{Definition}[section]
+\newtheorem{myassumption}{Assumption}[section]
+
+\theoremstyle{remark}
+\newtheorem{myremark}{Remark}[section]
+
+\newcounter{saveenumi}
+\newcommand{\seti}{\setcounter{saveenumi}{\value{enumi}}}
+\newcommand{\conti}{\setcounter{enumi}{\value{saveenumi}}}
+
+\resetcounteronoverlays{saveenumi}
+
+\title{Control de Sistemas}
+\subtitle{\small Clase 10: Introducción al Control Digital}
+\author{Gerardo Becerra, Ph.D.}
+\institute{Pontificia Universidad Javeriana\\ Departamento de Electrónica}
+\date{Abril 24, 2020}
+
+\begin{document}
+
+\frame{\titlepage}	
+
+\begin{frame}[<+->]\frametitle{Introducción}
+\centering
+\begin{itemize}
+	\item Control analógico estudiado hasta el momento $\rightarrow$ se implementa usando circuitos electrónicos analógicos.
+	\item Actualmente, los sistemas de control se implementan usando sistemas digitales (microprocesadores, microcontroladores).
+	\item Su uso se ha incrementado a medida que su precio disminuye y sus capacidades aumentan.
+	\item Sistema de control digital $\rightarrow$ usa señales digitales y un computador digital para controlar el proceso.
+	\item Se requieren circuitos especiales para convertir las señales entre sus representaciones digital / analógica y actuar como interfaz entre el controlador y el proceso.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Elementos de un Sistema de Control Digital}
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=9cm]{images/digitalControlSystem.eps}
+	\end{figure}
+	\small
+	\vspace*{-2mm}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{itemize}
+				\item Actuador, proceso: sistemas físicos que poseen señales analógicas.
+				\item Sensor: captura la señal de salida de la planta, generando una señal eléctrica.
+				\item Convertidor analógico-digital (ADC): transforma la señal eléctrica generada por el sensor a una representación digital.
+			\end{itemize}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\begin{itemize}
+				\item Computador digital: implementa la función del controlador/compensador. Calcula la ley de control a partir de la referencia y la medición y genera una señal de control digital.
+				\item Convertidor digital-analógico (DAC): transforma la señal de control generada por el computador en una representación analógica.
+			\end{itemize}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Elementos de un Sistema de Control Digital}
+	\small
+	\begin{itemize}
+		\item Controladores analógicos $\rightarrow$ se construyen usando circuitos analógicos (resistores, capacitores, amplificadores operacionales).
+		\item Dichos circuitos realizan implícitamente la operación de integración.
+		\item Integración: operación fundamental para la solución de ecuaciones diferenciales.
+		\item Computadores digitales $\rightarrow$ no pueden integrar.
+		\item Integración numérica: aproximación de la solución usando una ecuación algebráica.
+		\item Diseño de controladores digitales:
+		\begin{itemize}
+			\item Diseño del controlador en tiempo continuo y discretización del controlador obtenido $\rightarrow$ \textcolor{green}{implementación directa usando los métodos que ya conocemos,} \textcolor{red}{puede presentar errores de aproximación.}
+			\item Diseño del controlador directamente en el dominio digital $\rightarrow$ \textcolor{green}{no hay errores de aproximación,} \textcolor{red}{se requiere conocer métodos específicos de sintonización.}
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Elementos de un Sistema de Control Digital}
+	% \vspace*{5mm}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=7.5cm]{images/digitalControlSystem2.eps}
+			\end{figure}
+			Convertidor analógico - digital (ADC):
+			\begin{itemize}
+				\item Convierte el voltaje $y(t)$ en un número binario (10 - 12 bits).
+				\item 10 bits: $2^{10} = 1024$ valores $\rightarrow$ resolución de $0.1 \%$.
+			\end{itemize}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\begin{itemize}
+				\item La conversión de $y(t)$ se realiza con un periodo de muestreo $T$ obteniendo la señal discreta $y(kT)$, $k \in \mathbb{Z}$.
+			\end{itemize}
+			\pause
+			Referencia $r(kT)$:
+			\begin{itemize}
+				\item Usando un sampler-ADC para digitalizar una señal analógica $r(t)$.
+				\item Valor digital obtenido desde un puerto de comunicaciones.
+			\end{itemize}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Elementos de un Sistema de Control Digital}
+	\vspace*{-3mm}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=7.5cm]{images/digitalControlSystem2.eps}
+			\end{figure}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			Convertidor digital - analógico:
+			\begin{itemize}
+				\item Convierte el número binario $u(kT)$ en un voltaje $u(t)$.
+				\item Un retenedor de orden cero (ZOH) mantiene el voltaje durante el periodo de muestreo.
+				\item El voltaje $u(t)$ se aplica sobre el actuador como en el caso de un sistema de control analógico.
+			\end{itemize}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Elementos de un Sistema de Control Digital}
+	\vspace*{-2mm}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=7.5cm]{images/digitalControlSystem2.eps}
+			\end{figure}
+			Controlador digital:
+			\begin{itemize}
+				\item Opera sobre muestras de la señal de salida de la planta.
+				\item Dinámica del controlador $\rightarrow$ se implementa usando ecuaciones de diferencias.
+			\end{itemize}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\begin{itemize}
+				\item Diseño:
+				\begin{itemize}
+					\item Discretización de un controlador de tiempo continuo.
+					\item Métodos de sintonización de controladores discretos.
+				\end{itemize}
+				\item Métodos de discretización:
+				\begin{itemize}
+					\item Backward
+					\item Tustin
+					\item Mapeo de polos y ceros
+				\end{itemize}
+				\item Se requiere un $T$ suficientemente pequeño para obtener una buena aproximación.
+			\end{itemize}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Sistemas de Datos Muestreados}
+	\vspace*{3mm}
+	\begin{itemize}
+		\item Señal discreta: Señal obtenida a partir de una señal de tiempo contínuo $x(t)$ al tomar muestras en instantes de tiempo discretos $x(kT)$.
+		\item Sistema de datos muestreados: Sistema donde parte de éste tiene señales discretas.
+		\item Muestreador (sampler): switch que se cierra por un instante cada $T$ segundos.
+	\end{itemize}
+	\begin{figure}
+		\centering
+		\includegraphics[width=13cm]{images/sampler.eps}
+	\end{figure}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Sistemas de Datos Muestreados}
+	\vspace*{-2mm}
+	\begin{itemize}
+		\item Muestreador-retenedor (sample and hold): sistema que mantiene el valor de la muestra tomada durante el periodo de muestreo $T$.
+	\end{itemize}
+	\begin{figure}
+		\centering
+		\includegraphics[width=13cm]{images/sampleHold.eps}
+	\end{figure}
+	\pause
+	\vspace*{-5mm}
+	\begin{columns}
+		\begin{column}{0.6\textwidth}
+			\begin{itemize}
+				\item Retenedor de orden cero (zero order hold):
+			\end{itemize}
+				\vspace*{-3mm}
+				\begin{align*}
+					p(t) &= u(t) - u(t-T)\\
+					G_0(s) &= \frac{1}{s}-\frac{1}{s}e^{-sT} = \frac{1-e^{-sT}}{s}
+				\end{align*}
+		\end{column}
+		\begin{column}{0.4\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=3cm]{images/zeroOrderHold.eps}
+			\end{figure}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Transformada Zeta}
+	\begin{itemize}
+		\item Se utiliza en sistemas de datos muestreados para transformar una señal/sistema a una representación en el dominio de la frecuencia compleja.
+		\item Es el equivalente de tiempo discreto de la transformada de Laplace.
+		\item Se define como:
+		\begin{equation*}
+			\mathcal{Z}\left[ f(t) \right] = F(z) = \sum_{k=0}^{\infty}f(kT)z^{-k}
+		\end{equation*}
+		\item Ejemplo: Encontrar la transformada $\mathcal{Z}$ de un escalón unitario.
+		\begin{align*}
+			x(t) =
+			\left\{
+			\begin{array}{lr}
+				0, & t < 0\\
+				1, & t \geq 0
+			\end{array}
+			\right.
+		\end{align*}
+		\pause
+		Para $t < 0$: $X(z) = \sum_{k=0}^{\infty} 0 z^{-k} = 0$\\
+		\vspace*{3mm}
+		\pause
+		Para $t \geq 0$: $X(z) = \sum_{k=0}^{\infty} 1 z^{-k} = 1 + z^{-1} + z^{-2} + z^{-3} + \dots = \frac{1}{1-z^{-1}} = \frac{z}{z-1}$
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Propiedades de la Transformada Zeta}
+\begin{table}
+	\begin{tabular}{cll}
+		Prop & $x(t)$ & $X(z)$\\
+		\hline
+		1 & $kx(t)$ & $kX(z)$\\
+		2 & $x_1(t) + x_2(t)$ & $X_1(z) + X_2(z)$\\
+		3 & $x(t-nT)$ & $z^{-n}X(z)$, si $x(t) = 0$ para $t<0$ y $X(z)$ existe\\
+		4 & $x(0)$, valor inicial & $\lim_{z\rightarrow \infty} X(z)$, si el límite existe\\
+		5 & $x(\infty)$, valor final & $\lim_{z\rightarrow 1}(z-1) X(z)$, si el límite existe y el sistema es estable
+	\end{tabular}
+\end{table}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Transformada Zeta de la Derivada de una Función}
+	Encuentre la transformada Zeta de $\frac{dx(t)}{dt}$.
+	\pause
+	\begin{align*}
+		&\frac{dx(t)}{dt} \approx \frac{x(kT) - x((k-1)T)}{T}\ \text{(approximación de primer orden)}\\
+		&\mathcal{Z}\left\{\frac{x(kT) - x((k-1)T)}{T}\right\} = \frac{X(z)-z^{-1}X(z)}{T} = \frac{1-z^{-1}}{T} X(z)\\
+		&= \frac{z-1}{zT} X(z)
+	\end{align*}
+	\vspace*{-3mm}
+	\begin{columns}
+		\pause
+		\begin{column}{0.5\textwidth}
+			Note que:
+			\begin{align*}
+				\mathcal{Z}\left\{\frac{dx(t)}{dt}\right\} &\approx \frac{1-z^{-1}}{T} X(z) \\
+				\mathcal{L}\left\{\frac{dx(t)}{dt}\right\} &= s X(s)
+			\end{align*}
+		\end{column}
+		\pause
+		\begin{column}{0.5\textwidth}
+		Entonces usando la aproximación de primer orden (backward):
+		\begin{equation*}
+			s \approx \frac{z-1}{zT}
+		\end{equation*}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Transformada Zeta de la Integral de una Función}
+	Usando la aproximación integral por trapecios:
+	\begin{align*}
+				\mathcal{Z}\left\{\int x(t) dt\right\} &\approx \frac{T}{2} \frac{1+z^{-1}}{1-z^{-1}} X(z) = \frac{T}{2} \frac{z+1}{z-1} X(z) \\
+				\mathcal{L}\left\{\int x(t) dt\right\} &= \frac{1}{s} X(s)
+	\end{align*}
+	\pause
+	Entonces, usando la aproximación trapezoidal (Tustin):
+	\begin{equation*}
+		s \approx \frac{2}{T}\frac{z-1}{z+1}
+	\end{equation*}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Discretización de Sistemas - Ejemplo}
+	\vspace*{3mm}	
+	Discretizar $G(s) = \frac{1}{s^2 + s + 1}$ para $T=1$ usando el método backward.\\
+	\pause
+	\vspace*{4mm}
+	\begin{columns}
+		\begin{column}{0.3\textwidth}
+			Aproximación backward:
+			\begin{equation*}
+				s = \frac{z-1}{zT}
+			\end{equation*}
+			\pause
+			\begin{align*}
+				G(z) &= \frac{1}{\left(\frac{z-1}{z}\right)^2 + \frac{z-1}{z} + 1}\\
+				&= \frac{z^3}{3z^3-3z^2+z}
+			\end{align*}
+		\end{column}
+		\pause
+		\begin{column}{0.7\textwidth}
+			\lstinputlisting{code/backwardDiscretization.m}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Discretización de Sistemas - Ejemplo}
+	\vspace*{3mm}	
+	Discretizar $G(s) = \frac{1}{s^2 + s + 1}$ para $T=1$ usando el método backward.\\
+	\begin{columns}
+		\begin{column}{0.3\textwidth}
+			Respuesta paso del sistema de tiempo continuo $G(s)$ y del sistema discretizado $G(z)$.
+		\end{column}
+		\begin{column}{0.7\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=8.5cm]{images/backwardStepResp.eps}
+			\end{figure}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Discretización de Sistemas - Ejemplo}
+	\vspace*{3mm}	
+	Discretizar $G(s) = \frac{1}{s^2 + s + 1}$ para $T=1$ usando el método Tustin.\\
+	\pause
+	\vspace*{4mm}	
+	\begin{columns}
+		\begin{column}{0.3\textwidth}
+			Approximación Tustin:
+			\begin{equation*}
+				s = \frac{2}{T}\frac{z-1}{z+1}
+			\end{equation*}
+			\pause
+			\begin{align*}
+				G(z) &= \frac{1}{\left(2\frac{z-1}{z+1}\right)^2 + 2\frac{z-1}{z+1} + 1}\\
+				&= \frac{z^3+3z^2+3z+1}{7z^3+z^2-3z+3}
+			\end{align*}
+		\end{column}
+		\pause
+		\begin{column}{0.7\textwidth}
+			\lstinputlisting{code/tustinDiscretization.m}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Discretización de Sistemas - Ejemplo}
+	\vspace*{3mm}	
+	Discretizar $G(s) = \frac{1}{s^2 + s + 1}$ para $T=1$ usando el método Tustin.\\
+	\begin{columns}
+		\begin{column}{0.3\textwidth}
+			Respuesta paso del sistema de tiempo continuo $G(s)$ y del sistema discretizado $G(z)$.
+		\end{column}
+		\begin{column}{0.7\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=8.5cm]{images/tustinStepResp.eps}
+			\end{figure}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Discretización de Sistemas - Ejemplo}
+	\vspace*{3mm}	
+	Discretizar $G(s) = \frac{1}{s^2 + s + 1}$ para $T = \{2,1,0.5,0.1\}$ usando el método backward.\\
+	\begin{columns}
+		\begin{column}{0.3\textwidth}
+			Respuesta paso del sistema continuo $G(s)$ y de sistemas discretizados $G(z)$ con differentes periodos de muestreo $T$.
+		\end{column}
+		\begin{column}{0.7\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=8.5cm]{images/backwardStepRespDiffT.eps}
+			\end{figure}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Discretización de Sistemas - Ejemplo}
+	\vspace*{3mm}	
+	Discretizar $G(s) = \frac{1}{s^2 + s + 1}$ para $T = \{2,1,0.5,0.1\}$ usando el método Tustin.\\
+	\begin{columns}
+		\begin{column}{0.3\textwidth}			
+			Respuesta paso del sistema continuo $G(s)$ y de sistemas discretizados $G(z)$ con differentes periodos de muestreo $T$.
+		\end{column}
+		\begin{column}{0.7\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=8.5cm]{images/tustinStepRespDiffT.eps}
+			\end{figure}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Procedimiento para el Diseño de Controladores Digitales}
+	\begin{enumerate}
+		\item Diseñar el controlador usando las técnicas para tiempo continuo.
+		\item Seleccionar un método de discretización.
+		\item Seleccionar el tiempo de muestreo $T$.
+		\item Discretizar el controlador.
+		\item Verificar que se satisfacen los requerimientos del sistema en lazo cerrado con el controlador discretizado.
+		\item Expresar la función de transferencia de tiempo discreto como una ecuación de diferencias.
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Procedimiento para Diseño de Controladores Digitales - Ejemplo}
+	Considere el sistema 
+	\begin{equation*}
+		G(s) = \frac{0.8}{(30s+1)(13s+1)(3s+1)}
+	\end{equation*}
+	Diseñe un algoritmo de control digital tal que el sistema:
+	\begin{enumerate}
+		\item Error de estado estacionario ante escalón unitario $e_{ss} = 0$.
+		\item Porcentaje de sobrepico $PO \leq 15\%$.
+		\item Tiempo de establecimiento $T_s \leq 100$.
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Procedimiento para Diseño de Controladores Digitales - Ejemplo}
+	\begin{itemize}
+		\item A partir de los requerimientos del problema se calcula que para el sistema de lazo cerrado $\zeta = 0.5165$, $\omega_n = 0.0774$.
+		\pause
+		El polinomio deseado correspondiente es $q(s) = s^2 +0.08s + 0.006$.
+		\pause
+		Los polos deseados son $s_{1,2} = -0.04 \pm 0.0663j$.
+		\pause
+		\item Se decide utilizar un controlador PID:
+		\begin{equation*}
+			G_c(s) = K_p \left(1 + \frac{1}{T_i s} + T_d s\right)
+		\end{equation*}
+		\pause
+		Usando el método de LGR por aproximación de polos dominantes se encuentra que $K_p = 14.029$, $T_i = 13.5593$, $T_d = 12.5$.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Procedimiento para Diseño de Controladores Digitales - Ejemplo}
+	\vspace*{1.7mm}
+	\begin{columns}
+		\begin{column}{0.3\textwidth}
+			La respuesta paso del sistema en lazo cerrado con el controlador PID de tiempo continuo cumple con los requerimientos especificados.
+		\end{column}
+		\begin{column}{0.7\textwidth}
+		\begin{figure}
+			\centering
+			\includegraphics[width=9cm]{images/stepRespPIDCont.eps}
+		\end{figure}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Procedimiento para Diseño de Controladores Digitales - Ejemplo}
+	\begin{columns}
+		\begin{column}{0.3\textwidth}
+			Modelo de Simulink empleado para comparar el desempeño de los controladores PID discretizados respecto al controlador PID de tiempo continuo.
+		\end{column}
+		\begin{column}{0.7\textwidth}
+		\begin{figure}
+			\centering
+			\includegraphics[width=9cm]{images/simulinkPIDcomparison.eps}
+		\end{figure}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Procedimiento para Diseño de Controladores Digitales - Ejemplo}
+	\begin{columns}
+		\begin{column}{0.3\textwidth}
+			Comparación de respuestas paso del sistema en lazo cerrado con controlador PID de tiempo continuo y con controlador PID discretizado usando método backward con diferentes tiempos de muestreo.
+		\end{column}
+		\begin{column}{0.7\textwidth}
+		\begin{figure}
+			\centering
+			\includegraphics[width=9cm]{images/stepRespPIDComparBackward.eps}
+		\end{figure}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Procedimiento para Diseño de Controladores Digitales - Ejemplo}
+	\begin{columns}
+		\begin{column}{0.3\textwidth}
+			Comparación de respuestas paso del sistema en lazo cerrado con controlador PID de tiempo continuo y con controlador PID discretizado usando método Tustin con diferentes tiempos de muestreo.
+		\end{column}
+		\begin{column}{0.7\textwidth}
+		\begin{figure}
+			\centering
+			\includegraphics[width=9cm]{images/stepRespPIDComparTustin.eps}
+		\end{figure}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Procedimiento para Diseño de Controladores Digitales - Ejemplo}
+	Se decide utilizar el controlador discretizado usando el método de Tustin con un periodo de muestreo $T_s = 0.1$ s.
+	\pause
+	En este caso la función de transferencia del PID en tiempo discreto es:
+	\begin{equation*}
+		G_c(z) = \frac{U(z)}{E(z)} = \frac{9.549 \times 10^{5} z^2 - 1.902 \times  10^{6} z + 9.473 \times 10^{5}}{271.2 z^2 - 271.2}
+	\end{equation*}
+	\pause
+	Asignando nombres a los coeficientes de la función de transferencia:
+	\begin{equation*}
+		G_c(z) = \frac{U(z)}{E(z)} = \frac{b_2 z^2 + b_1 z + b_0}{a_2 z^2 + a_0}
+	\end{equation*}
+	\pause
+	Multiplicando el numerador y denominador por $z^{-2}$ se obtiene:
+	\begin{equation*}
+		\frac{U(z)}{E(z)} = \frac{b_2 + b_1 z^{-1} + b_0 z^{-2}}{a_2 + a_0 z^{-2}}
+	\end{equation*}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Procedimiento para Diseño de Controladores Digitales - Ejemplo}
+	Reorganizando:
+	\begin{align*}
+		U(z)\left(a_2 + a_0 z^{-2}\right) = E(z)\left( b_2 + b_1 z^{-1} + b_0 z^{-2} \right)\\
+		a_2 U(z) + a_0 z^{-2}U(z) = b_2 E(z) + b_1 z^{-1}E(z) + b_0 z^{-2}E(z)
+	\end{align*}
+	\pause
+	Aplicando la transformada $\mathcal{Z}$ inversa:
+	\begin{align*}
+		a_2 u(k) + a_0 u(k-2) = b_2&e(k) + b_1 e(k-1) + b_0 e(k-2)
+	\end{align*}
+	\pause
+	Despejando $u(k)$ se obtiene:
+	\begin{equation*}
+		u(k) = -\frac{a_0}{a_2}u(k-2) + \frac{b_2}{a_2} e(k) + \frac{b_1}{a_2} e(k-1) + \frac{b_0}{a_2} e(k-2)
+	\end{equation*}
+	\pause
+	Esta ecuación de diferencias puede implementarse como un algoritmo recursivo que calcula el valor de $e$ en cada instante de tiempo discreto $k$ a partir de valores presentes y pasados de $e$ y $u$.
+\end{frame}
+
+\begin{frame}[c]\frametitle{Procedimiento para Diseño de Controladores Digitales - Ejemplo}
+	\lstinputlisting[caption=Implementación del controlador PID discretizado como una ecuación de diferencias]{code/diffeq.m}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Procedimiento para Diseño de Controladores Digitales - Ejemplo}
+\begin{columns}
+	\begin{column}{0.3\textwidth}
+		Modelo de Simulink empleado para comparar el desempeño del control PID continuo, PID discreto como función de transferencia y PID discreto como ecuación de diferencias.
+	\end{column}
+	\begin{column}{0.7\textwidth}
+		\begin{figure}
+			\centering
+			\includegraphics[width=9cm]{images/simulinkPIDTustin.eps}
+		\end{figure}
+	\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Procedimiento para Diseño de Controladores Digitales - Ejemplo}
+\begin{columns}
+	\begin{column}{0.3\textwidth}
+		Señal de control $u(t)$ generada por el controlador PID continuo, PID discreto como función de transferencia y PID discreto como ecuación de diferencias.
+	\end{column}
+	\begin{column}{0.7\textwidth}
+		\begin{figure}
+			\centering
+			\includegraphics[width=9cm]{images/stepRespPIDComparUTustin.eps}
+		\end{figure}
+	\end{column}
+\end{columns}
+\end{frame}
+ 
+\begin{frame}[c]\frametitle{Procedimiento para Diseño de Controladores Digitales - Ejemplo}
+\begin{columns}
+	\begin{column}{0.3\textwidth}
+		Señal de salida $y(t)$ de la planta obtenida usando el controlador PID continuo, PID discreto como función de transferencia y PID discreto como ecuación de diferencias.
+	\end{column}
+	\begin{column}{0.7\textwidth}
+		\begin{figure}
+			\centering
+			\includegraphics[width=9cm]{images/stepRespPIDComparYTustin.eps}
+		\end{figure}
+	\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Conclusión}
+	\begin{itemize}
+		\item Control digital $\rightarrow$ alternativa interesante frente al control analógico.
+		\item Ventajas:
+		\begin{itemize}
+			\item Mayor flexibilidad en la implementación respecto al control analógico.
+			\item Menor susceptibilidad respecto al paso del tiempo y a las condiciones ambientales.
+			\item Bajo costo - alto desempeño.
+			\item Gran variedad de microcontroladores - microprocesadores con múltiples funciones y diseñados para diferentes aplicaciones.
+		\end{itemize}
+		\item Desventajas:
+		\begin{itemize}
+			\item Existencia de errores de aproximación en el paso de discretización $\rightarrow$ puede subsanarse diseñando el controlador digital directamente en el dominio discreto.
+			\item Requiere usar retenedores (ZOH) que agregan retardos al lazo de control y pueden disminuir la estabilidad del sistema.
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+ 
+\end{document}
