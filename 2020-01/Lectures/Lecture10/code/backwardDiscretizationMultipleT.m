@@ -19,4 +19,4 @@ ylabel('y(t)','FontSize',13)
 legend('G(s)','G(z),T=2','G(z),T=1','G(z),T=0.5','G(z),T=0.1',...
        'Location','east','FontSize',12)
 xlim([0 12]), ylim([0 1.25])
-exportgraphics(gcf,'../images/backwardStepRespDiffT.eps')
+% exportgraphics(gcf,'../images/backwardStepRespDiffT.eps')

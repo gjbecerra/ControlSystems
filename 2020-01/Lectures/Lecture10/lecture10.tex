@@ -19,9 +19,10 @@
 \usepackage[framed,numbered]{matlab-prettifier}
 
 \newfontfamily{\lstubuntumono}{Ubuntu Mono}
+\newfontfamily{\lstsourcecodepro}{Source Code Pro}
 \lstset{
   style              = Matlab-editor,
-  basicstyle				 =\lstubuntumono\tiny,
+  basicstyle		 =\lstubuntumono\tiny,
   escapechar         = ",
   mlshowsectionrules = false,
 }
@@ -182,8 +183,9 @@ test/.default={3pt}}
 		\item Integración numérica: aproximación de la solución usando una ecuación algebráica.
 		\item Diseño de controladores digitales:
 		\begin{itemize}
-			\item Diseño del controlador en tiempo continuo y discretización del controlador obtenido $\rightarrow$ \textcolor{green}{implementación directa usando los métodos que ya conocemos,} \textcolor{red}{puede presentar errores de aproximación.}
-			\item Diseño del controlador directamente en el dominio digital $\rightarrow$ \textcolor{green}{no hay errores de aproximación,} \textcolor{red}{se requiere conocer métodos específicos de sintonización.}
+			\item Diseño del controlador en tiempo continuo y discretización del controlador obtenido \pause $\rightarrow$ \textcolor{green}{implementación directa usando los métodos que ya conocemos,} \pause \textcolor{red}{puede presentar errores de aproximación.}
+			\pause
+			\item Diseño del controlador directamente en el dominio digital \pause $\rightarrow$ \textcolor{green}{no hay errores de aproximación,} \pause \textcolor{red}{se requiere conocer métodos específicos de sintonización.}
 		\end{itemize}
 	\end{itemize}
 \end{frame}
@@ -297,7 +299,7 @@ test/.default={3pt}}
 		\begin{column}{0.6\textwidth}
 			\begin{itemize}
 				\item Retenedor de orden cero (zero order hold):
-			\end{itemize}
+			\end{itemize} 
 				\vspace*{-3mm}
 				\begin{align*}
 					p(t) &= u(t) - u(t-T)\\
@@ -392,6 +394,21 @@ test/.default={3pt}}
 	\begin{equation*}
 		s \approx \frac{2}{T}\frac{z-1}{z+1}
 	\end{equation*}
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Discretización de Sistemas}
+	\begin{itemize}
+		\item Transformada $\mathcal{Z}$ $\rightarrow$ discretizar sistemas.
+		\item Función de transferencia de tiempo continuo $G(s)$ $\Longrightarrow$ Función de tiempo discreto $G(z)$:
+		\begin{equation*}
+			G(z) = \mathcal{Z}\left\{ \mathcal{L}^{-1}\left\{ G(s)\right\} \right\}
+		\end{equation*}
+		\item Dos formas de hacerlo:
+		\begin{itemize}
+			\item Calcular $g(t) = \mathcal{L}^{-1}\left\{ G(s)\right\}$ y luego $G(z) = \mathcal{Z}\left\{ g(kT) \right\}$ para un tiempo de muestreo $T$.
+			\item Reemplazar la variable $s$ en $G(s)$ por una de las aproximaciones presentadas en función de la variable $z$.
+		\end{itemize} 
+	\end{itemize}
 \end{frame}
 
 \begin{frame}[c]\frametitle{Discretización de Sistemas - Ejemplo}

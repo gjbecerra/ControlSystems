@@ -15,4 +15,4 @@ xlabel('Time [s]','FontSize',13)    % and sets labels and legends
 ylabel('y(t)','FontSize',13)
 legend('G(s)','G(z)','Location','east','FontSize',13)
 xlim([0 12]), ylim([0 1.25])
-exportgraphics(gcf,'../images/backwardStepResp.eps')
+% exportgraphics(gcf,'../images/backwardStepResp.eps')
