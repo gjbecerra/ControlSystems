@@ -1,0 +1,1089 @@
+\documentclass[aspectratio=169]{beamer}
+% \usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usetheme{metropolis}
+\usecolortheme{orchid}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{multirow}
+\usepackage[ruled]{algorithm2e}
+\usepackage{mathtools}
+\usepackage{caption}
+% \usepackage{epstopdf}
+\usepackage{hyperref}
+\usepackage{subcaption}
+\usepackage{siunitx}
+\usepackage{textcomp}
+\usepackage{tcolorbox}
+\usepackage{cancel}
+\usepackage[framed,numbered]{matlab-prettifier}
+
+\newfontfamily{\lstubuntumono}{Ubuntu Mono}
+\newfontfamily{\lstsourcecodepro}{Source Code Pro}
+\lstset{
+  style              = Matlab-editor,
+  basicstyle		 =\lstubuntumono\tiny,
+  escapechar         = ",
+  mlshowsectionrules = false,
+}
+ 
+\usepackage{tikz}
+\usetikzlibrary{tikzmark,positioning,arrows.meta,shapes.misc,calc}
+
+\setbeamerfont{footnote}{size=\tiny}
+
+% Information boxes
+\newcommand*{\info}[4][16.3]{%
+  \node [ annotation, #3, scale=0.65, text width = #1em,
+          inner sep = 2mm ] at (#2) {%
+  \list{$\bullet$}{\topsep=0pt\itemsep=0pt\parsep=0pt
+    \parskip=0pt\labelwidth=8pt\leftmargin=8pt
+    \itemindent=0pt\labelsep=2pt}%
+    #4
+  \endlist
+  };
+}
+
+%% Definitions for root locus plots
+\newcommand*{\rootlocusexample}[4]{% xmin,xmax,ymin,ymax,
+		\foreach \x in {#1,...,#2}{
+			\ifthenelse{\x=0}{}
+		  {% false case
+   			\draw (\x cm,1pt) -- (\x cm,-1pt) node[anchor=north] {$\x$};
+		  }
+		}
+		\foreach \y in {#3,...,#4}{
+			\ifthenelse{\y=0}{}
+		  {% false case
+   			\draw (-1pt,\y cm) -- (1pt,\y cm) node[anchor=east] {$\y$};
+		  }
+   	}
+		\draw [-latex] (#1,0) -- (#2,0) node [above]  {$\sigma$};
+		\draw [-latex] (0,#3) -- (0,#4) node [right] {$j\omega$};
+}
+
+\def\centerarc[#1](#2)(#3:#4:#5)% Syntax: [draw options] (center) (initial angle:final angle:radius)
+    { \draw[#1] ($(#2)+({#5*cos(#3)},{#5*sin(#3)})$) arc (#3:#4:#5); }
+
+\tikzset{%
+  >={Latex[width=2mm,length=2mm]},
+  % Specifications for style of nodes:
+            base/.style = {rectangle, rounded corners, draw=black,
+                           minimum width=4cm, minimum height=1cm,
+                           text centered, font=\sffamily},
+  activityStarts/.style = {base, fill=blue!30},
+       startstop/.style = {base, fill=red!30},
+    activityRuns/.style = {base, fill=green!30},
+         process/.style = {base, minimum width=2.5cm, fill=orange!15,
+                           font=\ttfamily},
+}
+
+\tikzset{pole/.style={cross out, draw=black, minimum size=2*(#1-\pgflinewidth), inner sep=0pt, outer sep=0pt},
+pole/.default={3pt}}
+\tikzset{poledes/.style={rectangle, draw=black, minimum size=2*(#1-\pgflinewidth), inner sep=0pt, outer sep=0pt},
+poledes/.default={3pt}}
+\tikzset{zero/.style={circle, draw=black, fill=white, minimum size=2*(#1-\pgflinewidth), inner sep=0pt, outer sep=0pt},
+zero/.default={3pt}}
+\tikzset{test/.style={rectangle, draw=black, fill=white, minimum size=2*(#1-\pgflinewidth), inner sep=0pt, outer sep=0pt},
+test/.default={3pt}}
+
+%% Definitions for block diagrams
+\tikzstyle{block} = [draw, fill=blue!20, rectangle, 
+    minimum height=2em, minimum width=3em]
+\tikzstyle{sum} = [draw, fill=blue!20, circle, node distance=1cm]
+\tikzstyle{input} = [coordinate]
+\tikzstyle{output} = [coordinate]
+\tikzstyle{pinstyle} = [pin edge={to-,thin,black}]
+
+\renewcommand\textbullet{\ensuremath{\bullet}}
+\newcommand\scalemath[2]{\scalebox{#1}{\mbox{\ensuremath{\displaystyle #2}}}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+%%% Bibliography
+\usepackage[citestyle=numeric,style=numeric,backend=biber,doi=false,isbn=false,url=false]{biblatex}
+\addbibresource{references.bib}
+
+%%% Suppress biblatex annoying warning
+\usepackage{silence}
+\WarningFilter{biblatex}{Patching footnotes failed}
+
+%%% new theorems %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\theoremstyle{definition}
+\newtheorem{mydef}{Definition}
+
+\theoremstyle{plain}
+\newtheorem{mylemma}{Lemma}[section]
+\newtheorem{mytheorem}{Theorem}[section]
+\newtheorem{myproposition}{Proposition}[section]
+\newtheorem{myproblem}{Problem}[section]
+\newtheorem{mydefinition}{Definition}[section]
+\newtheorem{myassumption}{Assumption}[section]
+
+\theoremstyle{remark}
+\newtheorem{myremark}{Remark}[section]
+
+\newcounter{saveenumi}
+\newcommand{\seti}{\setcounter{saveenumi}{\value{enumi}}}
+\newcommand{\conti}{\setcounter{enumi}{\value{saveenumi}}}
+
+\resetcounteronoverlays{saveenumi}
+
+\title{Control de Sistemas}
+\subtitle{\small Clase 11: Control y Observación de Sistemas en Variables de Estados}
+\author{Gerardo Becerra, Ph.D.}
+\institute{Pontificia Universidad Javeriana\\ Departamento de Electrónica}
+\date{}
+
+\begin{document}
+
+\frame{\titlepage}	
+
+\begin{frame}[<+->]\frametitle{Agenda}
+	\vspace{5mm}
+	\tableofcontents
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Introducción}
+\centering
+\begin{itemize}
+	\item Diseño de sistemas de control usando variables de estado.
+	\item El sistema es controlado usando la señal de control $u(t)$, que es una función de las variables de estado medibles.
+	\item No siempre es posible medir directamente todas las variables de estado de un sistema. $\rightarrow$  Observadores de estados.
+	\item Ubicación de polos del sistema de lazo cerrado en lugares donde se satisfacen los requerimientos de desempeño.
+	\item Proceso de Diseño:
+	\begin{itemize}
+		\item Asumiendo que todas las variables de estado son medibles diseñar una ley de control de retroalimentación de estados completos.
+		\item Construir un observador de estados para estimar los estados que no son directamente medibles.
+		\item Conectar el observador y la retroalimentación de estados al sistema.
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+\section{Modelos de Sistemas en Variables de Estados}
+\begin{frame}[c]\frametitle{Modelos de Sistemas en Variables de Estados}
+	Las ecuaciones de cualquier sistema lineal e invariante en el tiempo pueden escribirse de la forma:
+	\begin{align*}
+		\onslide<2->{\dot{\mathbf{x}}(t) &= \mathbf{Ax}(t) + \mathbf{Bu}(t) \hspace{5mm} \text{(Ec. de Estado)}\\}
+		\onslide<3->{\mathbf{y}(t) &= \mathbf{Cx}(t) + \mathbf{Du}(t) \hspace{5mm} \text{(Ec. de Salida)}}
+	\end{align*}
+	\vspace{-5mm}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}				
+			\begin{itemize}
+				\item<4-> $\mathbf{x}(t) \in \mathbb{R}^n$: Variables de estado.
+				\item<5-> $\mathbf{u}(t) \in \mathbb{R}^p$: Variables de entrada.
+				\item<6-> $\mathbf{y}(t) \in \mathbb{R}^q$: Variables de salida.
+			\end{itemize}
+		\end{column}
+		\begin{column}{0.5\textwidth}	
+			\begin{itemize}
+				\item<7-> $\mathbf{A} \in \mathbb{R}^{n \times n}$: Matriz del sistema.
+				\item<8-> $\mathbf{B} \in \mathbb{R}^{n \times p}$: Matriz de entrada.
+				\item<9-> $\mathbf{C} \in \mathbb{R}^{q \times n}$: Matriz de salida.
+				\item<10-> $\mathbf{D} \in \mathbb{R}^{q \times p}$: Matriz de transferencia directa.
+			\end{itemize}
+		\end{column}
+	\end{columns}
+	\vspace{3mm}		
+	\onslide<11->{Por simplicidad, se considerarán sistemas con $p = 1$, $q = 1$.}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Sistemas no Lineales}
+	Un sistema no lineal puede escribirse de la forma:
+	\begin{align*}
+		\dot{\mathbf{x}}(t) &= \mathbf{F}(\mathbf{x}(t),\mathbf{u}(t)), \hspace{3mm} F(\cdot,\cdot): \mathbb{R}^n \times \mathbb{R}^p \rightarrow \mathbb{R}^n\\
+		\mathbf{y}(t) &= \mathbf{H}(\mathbf{x}(t),\mathbf{u}(t)), \hspace{3mm} H(\cdot,\cdot): \mathbb{R}^n \times \mathbb{R}^p \rightarrow \mathbb{R}^q
+	\end{align*}
+	\onslide<2->{
+	Se definen los puntos de operación (puntos de equilibrio) como:
+	\begin{equation*}
+		\bar{\mathbf{x}} \in \mathbb{R}^n : 0 = \mathbf{F}(\bar{\mathbf{x}},\bar{\mathbf{u}}),\hspace{2mm} \bar{\mathbf{u}} \in \mathbb{R}^p
+	\end{equation*}}
+	\onslide<3->{
+	Dado un punto de operación $\{\bar{\mathbf{x}}, \bar{\mathbf{u}}\}$, es posible encontrar un sistema lineal e invariante en el tiempo que aproxime al sistema no lineal en la vecindad de $\{\bar{\mathbf{x}}, \bar{\mathbf{u}}\}$} \onslide<4->{$\longrightarrow$ \textcolor{blue}{Linealización}.}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Linealización de Sistemas no Lineales}
+	Para obtener el modelo linealizado se calcula la matriz Jacobiana (matriz de derivadas parciales) de las funciones $\mathbf{F}$ y $\mathbf{H}$ respecto a las variables $\mathbf{x}$ y $\mathbf{u}$:
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{align*}
+				\onslide<2->{	
+				A &= \left.\frac{\partial \mathbf{F}}{\partial \mathbf{x}}\right|_{\bar{\mathbf{x}},\bar{\mathbf{u}}} =
+				\left.
+				\begin{bmatrix}
+					\frac{\partial f_1}{\partial x_1} & \frac{\partial f_1}{\partial x_2} & \dots & \frac{\partial f_1}{\partial x_n}\\
+					\frac{\partial f_2}{\partial x_1} & \frac{\partial f_2}{\partial x_2} & \dots & \frac{\partial f_2}{\partial x_n}\\
+					\vdots & \vdots & \ddots & \vdots\\
+					\frac{\partial f_n}{\partial x_1} & \frac{\partial f_n}{\partial x_2} & \dots & \frac{\partial f_n}{\partial x_n}
+				\end{bmatrix}
+				\right|_{\bar{\mathbf{x}},\bar{\mathbf{u}}}\\}
+				\onslide<4->{
+				C &= \left.\frac{\partial \mathbf{H}}{\partial \mathbf{x}}\right|_{\bar{\mathbf{x}},\bar{\mathbf{u}}} =
+				\left.
+				\begin{bmatrix}
+					\frac{\partial h_1}{\partial x_1} & \frac{\partial h_1}{\partial x_2} & \dots & \frac{\partial h_1}{\partial x_n}\\
+					\frac{\partial h_2}{\partial x_1} & \frac{\partial h_2}{\partial x_2} & \dots & \frac{\partial h_2}{\partial x_n}\\
+					\vdots & \vdots & \ddots & \vdots\\
+					\frac{\partial h_q}{\partial x_1} & \frac{\partial h_q}{\partial x_2} & \dots & \frac{\partial h_q}{\partial x_n}
+				\end{bmatrix}
+				\right|_{\bar{\mathbf{x}},\bar{\mathbf{u}}}}
+			\end{align*}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\begin{align*}
+				\onslide<3->{
+				B &= \left.\frac{\partial \mathbf{F}}{\partial \mathbf{u}}\right|_{\bar{\mathbf{x}},\bar{\mathbf{u}}} =
+				\left.
+				\begin{bmatrix}
+					\frac{\partial f_1}{\partial u_1} & \frac{\partial f_1}{\partial u_2} & \dots & \frac{\partial f_1}{\partial u_p}\\
+					\frac{\partial f_2}{\partial u_1} & \frac{\partial f_2}{\partial u_2} & \dots & \frac{\partial f_2}{\partial u_p}\\
+					\vdots & \vdots & \ddots & \vdots\\
+					\frac{\partial f_n}{\partial u_1} & \frac{\partial f_n}{\partial u_2} & \dots & \frac{\partial f_n}{\partial u_p}
+				\end{bmatrix}
+				\right|_{\bar{\mathbf{x}},\bar{\mathbf{u}}}\\}
+				\onslide<5->{
+				D &= \left.\frac{\partial \mathbf{H}}{\partial \mathbf{u}}\right|_{\bar{\mathbf{x}},\bar{\mathbf{u}}} =
+				\left.
+				\begin{bmatrix}
+					\frac{\partial h_1}{\partial u_1} & \frac{\partial h_1}{\partial u_2} & \dots & \frac{\partial h_1}{\partial u_p}\\
+					\frac{\partial h_2}{\partial u_1} & \frac{\partial h_2}{\partial u_2} & \dots & \frac{\partial h_2}{\partial u_p}\\
+					\vdots & \vdots & \ddots & \vdots\\
+					\frac{\partial h_q}{\partial u_1} & \frac{\partial h_q}{\partial u_2} & \dots & \frac{\partial h_q}{\partial u_p}
+				\end{bmatrix}
+				\right|_{\bar{\mathbf{x}},\bar{\mathbf{u}}}}
+			\end{align*}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Linealización de Sistemas no Lineales}
+	El sistema linealizado obtenido corresponde a:
+	\begin{align*}
+		\dot{\hat{\mathbf{x}}}(t) &= \mathbf{A}\hat{\mathbf{x}}(t) + \mathbf{B}\hat{\mathbf{u}}(t)\\
+		\hat{\mathbf{y}}(t) &= \mathbf{C}\hat{\mathbf{x}}(t) + \mathbf{D}\hat{\mathbf{u}}(t)
+	\end{align*}
+	\onslide<2->{
+	donde 
+	\begin{align*}
+		\hat{\mathbf{x}}(t) &= \mathbf{x}(t) - \bar{\mathbf{x}}\\
+		\hat{\mathbf{u}}(t) &= \mathbf{u}(t) - \bar{\mathbf{u}}\\
+		\hat{\mathbf{y}}(t) &= \mathbf{y}(t) - \bar{\mathbf{y}}
+	\end{align*}}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Esquema de Control por Retroalimentación de Estados}
+	Compensador: Ley de control por retroalimentación de estados + observador de estados.
+	\begin{figure}
+		\centering
+		\includegraphics[width=9cm]{images/stateFeedbackCompensator.eps}
+	\end{figure}
+\end{frame}
+
+\section{Controlabilidad - Observabilidad}
+\begin{frame}[c]\frametitle{Controlabilidad}
+	La controlabilidad es necesaria para poder ubicar los polos del sistema en lazo cerrado de forma arbitraria.
+	\onslide<2->{
+	\begin{definition}[Controlabilidad]
+		Un sistema es completamente controlable si existe una señal de control $u(t)$ que logre transferir cualquier estado inicial $x(t_0)$ a cualquier otro estado $x(t)$ en un tiempo finito $t$, con $t_0 \leq t \leq T$.
+	\end{definition}}
+	\onslide<3->{
+	Para verificar la controlabilidad de un sistema, se evalúa si la matriz de controlabilidad es de rango completo:
+	\begin{equation*}
+		rank\left(\mathcal{P}_c\right) = rank\left(
+		\begin{bmatrix}
+			\mathbf{B} & \mathbf{AB} & \mathbf{A}^2 \mathbf{B} & \dots & \mathbf{A}^{n-1}\mathbf{B}
+		\end{bmatrix}	
+		\right) = n
+	\end{equation*}}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Ejemplo: Controlabilidad de un Sistema}
+	Determine si el siguiente sistema es controlable:
+	\begin{align*}
+		\dot{\mathbf{x}}(t) &=
+		\begin{bmatrix}
+			-2 & 0\\
+			d & -3
+		\end{bmatrix}
+		\mathbf{x}(t) +
+		\begin{bmatrix}
+			1\\ 0
+		\end{bmatrix}
+		u(t)\\
+		y(t) &=
+		\begin{bmatrix}
+			0 & 1
+		\end{bmatrix}
+		\mathbf{x}(t) +
+		\begin{bmatrix}
+			0
+		\end{bmatrix}
+		u(t)
+	\end{align*}
+	\onslide<2->{
+	Construyendo la matriz de controlabilidad:
+	\begin{equation*}
+		\mathbf{B} =
+		\begin{bmatrix}
+			1 \\ 0
+		\end{bmatrix},
+		\hspace{3mm}
+		\mathbf{AB} =
+		\begin{bmatrix}
+			-2 & 0\\
+			d & -3
+		\end{bmatrix}
+		\begin{bmatrix}
+			1 \\ 0
+		\end{bmatrix} =
+		\begin{bmatrix}
+			-2\\ d
+		\end{bmatrix}
+	\end{equation*}}
+	\onslide<3->{
+	\begin{equation*}
+		\mathcal{P}_c =
+		\begin{bmatrix}
+		 	\mathbf{B} & \mathbf{AB}
+		\end{bmatrix} =
+		\begin{bmatrix}
+			1 & -2\\
+			0 & d
+		\end{bmatrix}
+	\end{equation*}}
+	\onslide<4->{
+	$d \neq 0 \Longleftrightarrow rank(\mathcal{P}_c) = 2 \Longleftrightarrow$ El sistema es controlable.}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Observabilidad}
+	La observabilidad se refiere a la posibilidad de estimar las variables de estado.
+	\onslide<2->{
+	\begin{definition}[Observabilidad]
+		Un sistema es completamente observable si y sólo si existe un tiempo finito $T$ tal que el estado inicial $x(t_0)$ puede determinarse a partir de la historia observada $y(t)$ dada una señal de control $u(t)$, para $t_0 \leq t \leq T$.
+	\end{definition}}
+	\onslide<3->{
+	Para verificar la observabilidad de un sistema se evalúa si la matriz de observabilidad es de rango completo:
+	\begin{equation*}
+		rank(\mathcal{P}_o) = rank\left(
+		\begin{bmatrix}
+			\mathbf{C} \\ \mathbf{CA} \\ \vdots \\ \mathbf{CA}^{n-1}
+		\end{bmatrix}
+		\right) = n
+	\end{equation*}}
+\end{frame}
+ 
+\begin{frame}[c]\frametitle{Ejemplo: Controlabilidad de un Sistema}
+	Determine si el siguiente sistema es observable:
+	\begin{align*}
+		\dot{\mathbf{x}}(t) &=
+		\begin{bmatrix}
+			-2 & 0\\
+			d & -3
+		\end{bmatrix}
+		\mathbf{x}(t) +
+		\begin{bmatrix}
+			1\\ 0
+		\end{bmatrix}
+		u(t)\\
+		y(t) &=
+		\begin{bmatrix}
+			0 & 1
+		\end{bmatrix}
+		\mathbf{x}(t) +
+		\begin{bmatrix}
+			0
+		\end{bmatrix}
+		u(t)
+	\end{align*}
+	\onslide<2->{
+	Construyendo la matriz de observabilidad:
+	\begin{equation*}
+		\mathbf{C} =
+		\begin{bmatrix}
+			0 & 1
+		\end{bmatrix},
+		\hspace{3mm}
+		\mathbf{CA} =
+		\begin{bmatrix}
+			0 & 1
+		\end{bmatrix}
+		\begin{bmatrix}
+			-2 & 0\\
+			d & -3
+		\end{bmatrix} = 
+		\begin{bmatrix}
+			d & -3
+		\end{bmatrix}
+	\end{equation*}}
+	\onslide<3->{
+	\begin{equation*}
+		\mathcal{P}_o = 
+		\begin{bmatrix}
+			\mathbf{C} \\ \mathbf{CA}
+		\end{bmatrix} =
+		\begin{bmatrix}
+			0 & 1\\
+			d & -3
+		\end{bmatrix}
+	\end{equation*}}
+	\onslide<4->{	
+	$d \neq 0 \Longleftrightarrow rank(\mathcal{P}_o) = 2 \Longleftrightarrow$ El sistema es observable.}
+\end{frame}
+
+\section{Control por Retroalimentación de Estados}
+\begin{frame}[c]\frametitle{Control por Retroalimentación de Estados - Problema de Regulación}
+	\vspace{2mm}
+	\begin{columns}
+		\begin{column}{0.3\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=4cm]{images/fullStateFeedback.eps}
+			\end{figure}
+			\onslide<2->{
+			Modelo en variables de estado: $\dot{\mathbf{x}}(t) = \mathbf{Ax}(t) + \mathbf{B}u(t)$.\\}
+			\vspace{3mm}
+			\onslide<3->{
+			Señal de control: $u(t) = -\mathbf{Kx}(t)$.\\}
+		\end{column}
+		\begin{column}{0.7\textwidth}
+			\onslide<4->{
+			Reemplazando $u(t)$ en el modelo:
+			\begin{align*}
+				\dot{\mathbf{x}}(t) &= \mathbf{Ax}(t) + \mathbf{B}u(t) = \mathbf{Ax}(t) - \mathbf{BKx}(t)\\
+				\dot{\mathbf{x}}(t) &= (\mathbf{A} - \mathbf{BK})\mathbf{x}(t)
+			\end{align*}}
+			\vspace{2mm}
+			\onslide<5->{
+			Ecuación característica: $\det(\lambda \mathbf{I} - (\mathbf{A} - \mathbf{BK})) = 0$.\\}
+			\onslide<6->{
+			Si todas las raíces de la ecuación característica se encuentran en el semiplano izquierdo, el sistema de lazo cerrado es estable. Por lo tanto: $\mathbf{x}(t) = e^{(\mathbf{A}-\mathbf{BK})t}\mathbf{x}(t_0) \rightarrow 0$ cuando $t \rightarrow \infty$.\\}
+			\vspace{1mm}
+			\onslide<7->{	
+			Problema de Regulación: Calcular $\mathbf{K}$ tal que la condición inicial $x(t_0) \rightarrow 0$ de acuerdo con los requerimientos de diseño.}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Control por Retroalimentación de Estados - Problema de Regulación - Ejemplo}
+	\small
+	\vspace{3mm}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			Considere el sistema:
+			\begin{align*}
+				\dot{\mathbf{x}}(t) &=
+				\begin{bmatrix}
+					0 & 1 & 0\\
+					0 & 0 & 1\\
+					-2 & -3 & -5
+				\end{bmatrix}
+				\mathbf{x}(t) +
+				\begin{bmatrix}
+					0 \\ 0 \\ 1
+				\end{bmatrix}u(t)\\
+				y(t) &=
+				\begin{bmatrix}
+					1 & 0 & 0
+				\end{bmatrix}
+				\mathbf{x}(t)
+			\end{align*}
+			\onslide<2->{
+			Calculando el rango de la matriz de controlabilidad se determina que el sistema es controlable.\\}
+			\vspace{3mm}
+			\onslide<3->{
+			Asumiendo una matriz de retroalimentación de estados $\mathbf{K} = [k_1\ k_2\ k_3]$, el sistema de lazo cerrado es $\dot{\mathbf{x}}(t) = (\mathbf{A}-\mathbf{BK})\mathbf{x}(t)$, donde:}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\onslide<3->{
+			\begin{equation*}
+				\mathbf{A} - \mathbf{BK} = 
+				\begin{bmatrix}
+					0 & 1 & 0\\
+					0 & 0 & 1\\
+					-k_1-2 & -k_2-3 & -k_3-5
+				\end{bmatrix}
+			\end{equation*}}
+			\onslide<4->{			
+			La ecuación característica es:
+			\begin{align*}
+				\Delta(\lambda) &= \det(\lambda \mathbf{I} - (\mathbf{A} - \mathbf{BK}))\\
+				&= \lambda^3 + (k_3+5)\lambda^2 + (k_2+3)\lambda + (k_1+2) = 0
+			\end{align*}}
+			\onslide<5->{	
+			Se define la ecuación característica deseada como:
+			\begin{equation*}
+				\Delta_d(\lambda) = (\lambda^2 + 2 \zeta \omega_n \lambda + \omega_n^2)(\lambda + 10\zeta\omega_n)
+			\end{equation*}}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Control por Retroalimentación de Estados - Problema de Regulación - Ejemplo}
+	\small
+	\vspace{2mm}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}	
+			Seleccionando $PO = 5\%$, $T_s = 5$ se obtiene $\zeta = 0.69$, $\omega_n = 1.16$. La ecuación característica deseada es:
+			\begin{align*}
+				\Delta_d(\lambda) &= (\lambda^2 + 0.6\lambda + 36)(\lambda + 4.8)\\
+				&= \lambda^3 + 9.6\lambda^2 + 14.14\lambda + 10.75 
+			\end{align*}
+			\onslide<2->{
+			Comparando los polinomios se obtiene:
+			\begin{align*}
+				k_1 + 2 &= 10.75\\
+				k_2 + 3 &= 14.14\\
+				k_3 + 5 &= 9.6 
+			\end{align*}}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\onslide<3->{
+			Por lo tanto, la ganancia de retroalimentación de estados es:
+			\begin{equation*}
+				\mathbf{K} = [8.75,\ 11.14,\ 4.6]
+			\end{equation*}}
+			\onslide<4->{
+			Las raíces del polinomio deseado son $p_{des} = \{-0.8 \pm 0.839, -8\}$. Usando la función \texttt{place} de Matlab:
+			\lstinputlisting{code/stateFeedbackPlace.m}}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Control por Retroalimentación de Estados - Problema de Regulación - Ejemplo}
+Implementación en Simulink del control por retroalimentación de estados.
+\begin{figure}
+	\centering
+	\includegraphics[width=6cm]{images/stateFeedbackRegulatorSchematic.eps}		
+\end{figure}	
+\end{frame}
+
+\begin{frame}[c]\frametitle{Control por Retroalimentación de Estados - Problema de Regulación - Ejemplo}
+	\small
+	Respuesta del sistema en lazo cerrado ante condiciones iniciales $x(t_0) = [1,\ 0,\ 0]^\intercal$.
+	\vspace{-5mm}
+	\begin{columns}
+		\begin{column}{0.4\textwidth}
+			El estado $x(t)$ converge hacia el punto de equilibrio $\bar{x} = [0,\ 0,\ 0]^\intercal$.\\
+			\vspace{3mm}
+			La retroalimentación de estados genera la señal de control $u(t)$ necesaria para estabilizar el sistema en el punto de equilibrio dada cualquier condición inicial $x(t_0)$.
+		\end{column}
+		\begin{column}{0.6\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=8.5cm]{images/stateFeedbackRegulatorInitial.eps}
+			\end{figure}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\section{Observadores de Estados}
+\begin{frame}[<+->]\frametitle{Diseño de Observadores de Estados}
+	\begin{itemize}
+		\item Durante el diseño del control por retroalimentación de estados se asume que todos los estados del sistema están disponibles para ser retroalimentados.
+		\item En la práctica, es posible que sólo algunos de éstos se encuentren disponibles para ser medidos.
+		\item En algunos casos, instalar sensores puede incrementar demasiado la complejidad del sistema.
+		\item Si el sistema es observable es posible determinar (estimar) los estados que no son directamente medidos (observados).
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Diseño de Observadores de Estados}
+\small
+\begin{columns}
+	\begin{column}{0.5\textwidth}
+		Considere el sistema:
+		\begin{align*}
+			\dot{\mathbf{x}}(t) &= \mathbf{Ax}(t) + \mathbf{B}u(t)\\
+			y(t) &= \mathbf{Cx}(t)
+		\end{align*}
+		\onslide<2->{
+		El observador de estados completos de Luenberger se define como:
+		\begin{equation*}
+			\dot{\hat{\mathbf{x}}}(t) = \mathbf{A}\hat{\mathbf{x}}(t) + \mathbf{B}u(t) + \mathbf{L}(y(t) - \mathbf{C}\hat{\mathbf{x}}(t))
+		\end{equation*}}
+		\onslide<3->{
+		La matriz $\mathbf{L}$ es la ganancia del observador y se calcula durante el procedimiento de diseño del observador.\\}
+	\end{column}
+	\begin{column}{0.5\textwidth}
+		\onslide<2->{	
+		\begin{figure}
+			\centering
+			\includegraphics[width=6cm]{images/stateObserver.eps}
+		\end{figure}}
+		\onslide<4->{
+		Dos entradas $u(t)$, $y(t)$ y una salida $\hat{\mathbf{x}}(t)$.\\}
+		\vspace{3mm}
+		\onslide<5->{
+		Objetivo: proveer un estimado $\hat{\mathbf{x}}(t)$ tal que  $\hat{\mathbf{x}}(t) \rightarrow \mathbf{x}(t)$ cuando $t \rightarrow \infty$.\\}
+		\vspace{3mm}
+		\onslide<6->{
+		Se define el error de estimación como:
+		\begin{equation}
+			\mathbf{e}(t) = \mathbf{x}(t) - \hat{\mathbf{x}}(t)
+		\end{equation}}
+	\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Diseño de Observadores de Estados}
+\small
+\vspace{4mm}
+\begin{columns}
+	\begin{column}{0.5\textwidth}
+		Se define el error de estimación como:
+		\begin{equation*}
+			\mathbf{e}(t) = \mathbf{x}(t) - \hat{\mathbf{x}}(t)
+		\end{equation*}
+		\onslide<2->{
+		Derivando se obtiene:
+		\begin{equation*}
+			\dot{\mathbf{e}}(t) = \dot{\mathbf{x}}(t) - \dot{\hat{\mathbf{x}}}(t)
+		\end{equation*}}
+		\onslide<3->{	
+		Usando la ecuación de estado y del observador se tiene:
+		\begin{align*}
+			\dot{\mathbf{e}}(t) &= \mathbf{Ax}(t) + \mathbf{B}u(t) - \mathbf{A}\hat{\mathbf{x}}(t) - \mathbf{B}u(t) - \mathbf{L}(y(t) - \mathbf{C}\hat{\mathbf{x}}(t))\\
+			&= \mathbf{A}(\mathbf{x}(t)-\hat{\mathbf{x}}(t)) - \mathbf{L}(y(t) - \mathbf{C}\hat{\mathbf{x}}(t))\\
+			&= \mathbf{A}(\mathbf{x}(t)-\hat{\mathbf{x}}(t)) - \mathbf{L}(\mathbf{Cx}(t) - \mathbf{C}\hat{\mathbf{x}}(t))\\
+			&= (\mathbf{A} - \mathbf{LC})\mathbf{e}(t)
+		\end{align*}}
+	\end{column}
+	\begin{column}{0.5\textwidth}
+		\onslide<4->{
+		Se puede garantizar que $\mathbf{e}(t) \rightarrow 0$ cuando $t \rightarrow \infty$ para cualquier error de estimación inicial $\mathbf{e}(t_0)$ si la ecuación característica tiene todas sus raíces en el semiplano izquierdo:
+		\begin{equation*}
+			\det(\lambda \mathbf{I} - (\mathbf{A} - \mathbf{LC})) = 0
+		\end{equation*}}
+		\onslide<5->{
+		Diseño del observador: encontrar la matriz $\mathbf{L}$ tal que las raíces de la ecuación característica se encuentren en el semiplano izquierdo, asumiendo que el sistema es observable.}
+	\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Diseño de Observadores de Estados - Ejemplo}
+	\small
+	\vspace{5mm}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			Diseñe un observador de estados para el sistema:
+			\begin{align*}
+				\dot{\mathbf{x}}(t) &=
+				\begin{bmatrix}
+					0 & 1 & 0\\
+					0 & 0 & 1\\
+					-2 & -3 & -5
+				\end{bmatrix}
+				\mathbf{x}(t) +
+				\begin{bmatrix}
+					0 \\ 0 \\ 1
+				\end{bmatrix}u(t)\\
+				y(t) &=
+				\begin{bmatrix}
+					1 & 0 & 0
+				\end{bmatrix}
+				\mathbf{x}(t)
+			\end{align*}
+			\onslide<2->{
+			Calculando el rango de la matriz de observabilidad se determina que el sistema es observable.}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\onslide<3->{
+			Dada la ganancia del observador $\mathbf{L} = [l_1\ l_2\ l_3]^\intercal$, la dinámica del error es $\dot{\mathbf{e}}(t) = (\mathbf{A} - \mathbf{LC})\mathbf{e}(t)$, donde:
+			\begin{equation*}
+				\mathbf{A} - \mathbf{LC} =
+				\begin{bmatrix}
+					     -l_1 &  1 &  0\\
+					     -l_2 &  0 &  1\\
+					- l_3 - 2 & -3 & -5
+				\end{bmatrix}
+			\end{equation*}}
+			\onslide<4->{
+			El polinomio característico del sistema es:
+			\begin{align*}
+				\Delta(\lambda) &= \det(\lambda \mathbf{I} - (\mathbf{A} - \mathbf{LC})) = 0\\
+				&= \lambda^3 + (l_1 + 5)\lambda^2 + (5l_1 + l_2 + 3)\lambda\\
+				&+ (3l_1 + 5l_2 + l_3 + 2) = 0
+			\end{align*}}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Diseño de Observadores de Estados - Ejemplo}
+	% \small	
+	\vspace{3mm}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			Asumiendo $PO = 5\%$, $T_s = 1$ se obtiene $\zeta = 0.69$ y $\omega_n = 5.79$. El polinomio característico deseado es:
+			\begin{align*}
+				\Delta_d(\lambda) &= (\lambda^2 + 2\zeta\omega_n\lambda + \omega_n^2)(\lambda + 10\zeta\omega_n)\\
+				&= \lambda^3 + 48\lambda^2 + 353.6\lambda + 1343.8
+			\end{align*}
+			\onslide<2->{
+			Igualando los coeficientes se obtiene:
+			\begin{align*}
+				l_1 + 5 &= 48\\
+				5l_1 + l_2 + 3 &= 353.6\\
+				3l_1 + 5l_2 + l_3 + 2 &= 1343.8
+			\end{align*}}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\onslide<3->{
+			Entonces, la ganancia del observador es:
+			\begin{equation*}
+				\mathbf{L} = 
+				\begin{bmatrix}
+					43 & 135.6 & 534.85
+				\end{bmatrix}^\intercal
+			\end{equation*}}
+			\onslide<4->{
+			Las raíces del polinomio deseado son $p_{des} = \{-4 \pm 4.1948, -40\}$. Usando la función \texttt{place} de Matlab:
+			\lstinputlisting{code/stateObservationPlace.m}}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Diseño de Observadores de Estados - Ejemplo}
+	Implementación en Simulink del Observador de Estados
+	\begin{figure}
+		\centering
+		\includegraphics[width=8.5cm]{images/stateObservationSchematic.eps}
+	\end{figure}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Diseño de Observadores de Estados - Ejemplo}
+	Respuesta del sistema ante una entrada paso
+	\begin{columns}
+		\begin{column}{0.3\textwidth}
+			El estado estimado converge al estado real en 1 segundo, dada cualquier condición inicial $\mathbf{x}(t_0)$ del sistema.
+		\end{column}
+		\begin{column}{0.7\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=9cm]{images/stateObservationStepInitial.eps}
+			\end{figure}
+		\end{column}
+	\end{columns}		
+\end{frame}
+
+\section{Control por Retroalimentación y Observación de Estados}
+\begin{frame}[<+->]\frametitle{Control por Retroalimentación y Observación de Estados}
+	\begin{itemize}
+			\item El compensador por variables de estado se construye conectando la ley de control de estado completo al observador de estados.
+			\item Luego de diseñar la ley de control y el observador de estados, se puede conectar la salida del observador a la entrada de la retroalimentación de estados:
+			\begin{equation}
+				u(t) = -\mathbf{K}\hat{\mathbf{x}}(t)
+				\label{eq:controlLawObserver}
+			\end{equation}
+			\item Principio de separación: la ley de control y el observador pueden diseñarse independientemente.
+		\end{itemize}	
+\end{frame}
+
+\begin{frame}[c]\frametitle{Control por Retroalimentación y Observación de Estados}
+	\small
+	\vspace{2mm}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			Considere el observador:
+			\begin{equation*}
+				\dot{\hat{\mathbf{x}}}(t) = \mathbf{A}\hat{\mathbf{x}}(t) + \mathbf{B}u(t) + \mathbf{L}(y(t) - \mathbf{C}\hat{\mathbf{x}}(t))
+			\end{equation*}
+			\onslide<2->{
+			Reemplazando la ley de control \eqref{eq:controlLawObserver} y reorganizando:
+			\begin{align*}
+				\dot{\hat{\mathbf{x}}}(t) &= (\mathbf{A} - \mathbf{BK} - \mathbf{LC})\hat{\mathbf{x}}(t) + \mathbf{L}y(t)\\
+				u(t) &= -\mathbf{K}\hat{\mathbf{x}}(t)
+			\end{align*}}
+			\onslide<3->{
+			Las ecuaciones se pueden representar usando el siguiente diagrama:}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\onslide<3->{
+			\begin{figure}
+				\centering
+				\includegraphics[width=7cm]{images/stateObserverSchematic.eps}
+			\end{figure}}
+			\onslide<4->{
+			Reemplazando la ley de control en la ecuación del sistema se tiene:
+			\begin{equation*}
+				\dot{\mathbf{x}}(t) = \mathbf{Ax}(t) + \mathbf{BK}\hat{\mathbf{x}}(t)
+			\end{equation*}}
+			\onslide<5->{
+			Con $\hat{\mathbf{x}}(t) = \mathbf{x}(t) - \mathbf{e}(t)$ se tiene:
+			\begin{equation}
+				\dot{\mathbf{x}}(t) = (\mathbf{A} - \mathbf{BK})\mathbf{x}(t) + \mathbf{BK}\mathbf{e}(t)
+				\label{eq:stateContObsv}
+			\end{equation}}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Control por Retroalimentación y Observación de Estados}
+	\small
+	\vspace{2mm}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			Calculando el error de estimación para el compensador se tiene:
+			\begin{align}
+				\dot{\mathbf{e}}(t) &= \dot{\mathbf{x}}(t) - \dot{\hat{\mathbf{x}}}(t)\nonumber\\
+				&= \mathbf{Ax}(t) + \cancel{\mathbf{B}u(t)} - \mathbf{A}\hat{\mathbf{x}}(t) - \cancel{\mathbf{B}u(t)}\nonumber\\
+				&- \mathbf{L}y(t) + \mathbf{LC}\hat{\mathbf{x}}(t)\nonumber\\
+				&= \mathbf{A}(\mathbf{x}(t) - \hat{\mathbf{x}}(t)) - \mathbf{LC}(\mathbf{x}(t) - \hat{\mathbf{x}}(t))\nonumber\\
+				&= \mathbf{Ae}(t) - \mathbf{LCe}(t)\nonumber\\
+				&= (\mathbf{A} - \mathbf{LC})\mathbf{e}(t)
+				\label{eq:estimErrorContObsv}
+			\end{align}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\onslide<2->{
+			Reescribiendo las ecuaciones \eqref{eq:stateContObsv}, \eqref{eq:estimErrorContObsv} en forma matricial se tiene:
+			\begin{equation}
+				\begin{bmatrix}
+					\dot{\mathbf{x}}(t) \\ \dot{\mathbf{e}}(t)
+				\end{bmatrix} = 
+				\begin{bmatrix}
+					\mathbf{A} - \mathbf{BK} & \mathbf{BK} \\
+					\mathbf{0} & \mathbf{A}-\mathbf{LC}
+				\end{bmatrix}
+				\begin{bmatrix}
+					\mathbf{x}(t)\\ \mathbf{e}(t)
+				\end{bmatrix}
+				\label{eq:eqCompensator}
+			\end{equation}}
+			\onslide<3->{
+			La ecuación característica asociada al sistema \eqref{eq:eqCompensator} es:
+			\begin{equation*}
+				\Delta(\lambda) = \det(\lambda \mathbf{I} - (\mathbf{A} - \mathbf{BK}))\det(\lambda \mathbf{I} - (\mathbf{A} - \mathbf{LC}))
+			\end{equation*}}
+			\onslide<4->{
+			Si las raíces de $\det(\lambda \mathbf{I} - (\mathbf{A} - \mathbf{BK})) = 0$ y $\det(\lambda \mathbf{I} - (\mathbf{A} - \mathbf{LC})) = 0$ están en el semiplano izquierdo, todo el sistema es estable.}
+		\end{column}
+	\end{columns}	
+\end{frame}
+
+\begin{frame}[<+->]\frametitle{Control por Retroalimentación y Observación de Estados}
+	Procedimiento de Diseño
+	\begin{enumerate}
+		\item Determinar $\mathbf{K}$ tal que $\det(\lambda \mathbf{I} - (\mathbf{A} - \mathbf{BK})) = 0$ tenga sus raíces en el semiplano izquierdo, en ubicaciones apropiadas de acuerdo con las especificaciones de diseño.
+		\item Determinar $\mathbf{L}$ tal que $\det(\lambda \mathbf{I} - (\mathbf{A} - \mathbf{LC})) = 0$ tenga sus raíces en el semiplano izquierdo, en ubicaciones apropiadas para tener un buen desempeño en el observador.
+		\item Conectar el observador a la retroalimentación de estados usando:
+		\begin{equation*}
+			u(t) = - \mathbf{K}\hat{\mathbf{x}}(t)
+		\end{equation*}
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Control por Retroalimentación y Observación de Estados - Ejemplo}
+	Considere el sistema	
+	\begin{align*}
+		\dot{\mathbf{x}}(t) &=
+		\begin{bmatrix}
+			0 & 1 & 0\\
+			0 & 0 & 1\\
+			-2 & -3 & -5
+		\end{bmatrix}
+		\mathbf{x}(t) +
+		\begin{bmatrix}
+			0 \\ 0 \\ 1
+		\end{bmatrix}u(t)\\
+		y(t) &=
+		\begin{bmatrix}
+			1 & 0 & 0
+		\end{bmatrix}
+		\mathbf{x}(t)
+	\end{align*}
+	Ya se realizó el diseño por separado de la retroalimentación de estados y el observador de estados. Por lo tanto, se puede realizar la conexión del observador y la retroalimentación a la planta.
+\end{frame}
+
+\begin{frame}[c]\frametitle{Control por Retroalimentación y Observación de Estados - Ejemplo}
+	Implementación en Simulink del Compensador (Control y Observador de Estados)
+	\begin{figure}
+		\centering
+		\includegraphics[width=10cm]{images/stateFeedbackRegulatorObservationSchematic.eps}
+	\end{figure}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Control por Retroalimentación y Observación de Estados - Ejemplo}
+	\small
+	Respuesta del sistema con compensador ante condiciones iniciales $\mathbf{x}(t_0) = [2,\ 5,\ -1]^\intercal$.
+	\vspace{-2mm}
+	\begin{columns}
+		\begin{column}{0.3\textwidth}
+			La velocidad de convergencia de la estimación se ajusta cambiando la posición relativa de los polos del observador respecto a los de la retroalimentación de estados.
+		\end{column}
+		\begin{column}{0.7\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=9cm]{images/stateFeedbackRegulatorObservation2.eps}
+			\end{figure}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\section{Seguimiento de Referencias}
+\begin{frame}[<+->]\frametitle{Seguimiento de Referencias}
+	\begin{itemize}
+		\item En el esquema de control por retroalimentación de estados presentado el sistema funciona sólamente como regulador (sin entrada de referencia).
+		\item El seguimiento de referencias es muy importante en el diseño de sistemas de control.
+		\item Se pueden emplear diferentes métodos para introducir una señal de referencia en el control por retroalimentación de estados.
+		\item A continuación se presenta un método que elimina el error de estado estacionario respecto a la referencia y rechaza las perturbaciones.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Seguimiento de Referencias}
+	\begin{figure}
+		\centering
+		\includegraphics[width=8cm]{images/stateFeedbackRobust.eps}
+	\end{figure}
+	\begin{itemize}
+		\item<2-> Se introduce una retroalimentación desde la salida que se compara con la referencia.
+		\item<3-> El error de la referencia respecto al error se introduce a un integrador.
+		\item<4-> El resultado se suma a la salida de la retroalimentación de estados.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Seguimiento de Referencias}
+	\begin{figure}
+		\centering
+		\includegraphics[width=8cm]{images/stateFeedbackRobust.eps}
+	\end{figure}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			Se agrega una nueva variable de estado:
+			\begin{align*}
+				\dot{x}_a(t) &= r(t) - y(t) = r(t) - \mathbf{Cx}(t)\\
+				u(t) &=
+				\begin{bmatrix}
+					\mathbf{K} & k_a
+				\end{bmatrix}
+				\begin{bmatrix}
+					\mathbf{x}(t)\\ x_a(t)
+				\end{bmatrix}
+			\end{align*}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\onslide<2->{
+			Reemplazando en la ecuación de estado:
+			\begin{align*}
+				\begin{bmatrix}
+					\dot{\mathbf{x}}(t) \\ \dot{x}_a(t)
+				\end{bmatrix}
+				&=
+				\begin{bmatrix}
+					\mathbf{A+BK} & \mathbf{B}k_a\\
+					-\mathbf{C} & 0
+				\end{bmatrix}
+				\begin{bmatrix}
+					\mathbf{x}(t) \\ x_a(t)
+				\end{bmatrix}
+				+
+				\begin{bmatrix}
+					\mathbf{0} \\ 1
+				\end{bmatrix}
+				r(t)\\
+				y(t) &= 
+				\begin{bmatrix}
+					\textbf{C} & 0
+				\end{bmatrix}
+				\begin{bmatrix}
+					\textbf{x}(t) \\ x_a(t)
+				\end{bmatrix}
+			\end{align*}}
+		\end{column}
+	\end{columns}		
+\end{frame}
+
+\begin{frame}[c]\frametitle{Seguimiento de Referencias}
+	\vspace{3mm}
+	\begin{figure}
+		\centering
+		\includegraphics[width=8cm]{images/statefeedbackrobust.eps}
+	\end{figure}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			Para calcular las ganancias $\mathbf{K}$ y $k_a$ se construyen las matrices expandidas
+			\begin{equation*}
+				\mathbf{A}_e =
+				\begin{bmatrix}
+					\mathbf{A} & \mathbf{0}\\
+					-\mathbf{C} & 0
+				\end{bmatrix}, \hspace{3mm}
+				\mathbf{B}_e =
+				\begin{bmatrix}
+					\mathbf{B} \\ 0
+				\end{bmatrix}
+			\end{equation*}
+			\onslide<2->{
+			y se utiliza la función \texttt{place} de Matlab:}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\onslide<2->{
+			\lstinputlisting{code/stateTrackingPlace.m}}
+		\end{column}
+		\end{columns}		
+\end{frame}
+
+\begin{frame}[c]\frametitle{Seguimiento de Referencias - Ejemplo}
+	Implementación en Simulink de la retroalimentación de estados con seguimiento de referencia.
+	\begin{figure}
+		\centering
+		\includegraphics[width=10cm]{images/stateFeedbackTrackingSchematic.eps}
+	\end{figure}	
+\end{frame}
+
+\begin{frame}[c]\frametitle{Seguimiento de Referencias - Ejemplo}
+	\small
+	Respuesta del sistema con compensador ante condiciones iniciales $\mathbf{x}(t_0) = [2,\ 5,\ -1]^\intercal$.
+	\vspace{-2mm}
+	\begin{columns}
+		\begin{column}{0.3\textwidth}
+			La salida del sistema (correspondiente a $x_1(t)$) sigue a la referencia, mientras los otros estados convergen al equilibrio.
+		\end{column}
+		\begin{column}{0.7\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=9cm]{images/stateFeedbackTrackingStep.eps}
+			\end{figure}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\section{Compensador con Seguimiento de Referencia}
+\begin{frame}[c]\frametitle{Compensador con Seguimiento de Referencia - Ejemplo}
+	Implementación en Simulink del compensador (control y observador de estados) con seguimiento de referencia:
+	\begin{figure}
+		\centering
+		\includegraphics[width=11cm]{images/stateFeedbackTrackingObservationSchematic.eps}
+	\end{figure}
+\end{frame}
+
+\begin{frame}[c]\frametitle{Compensador con Seguimiento de Referencia - Ejemplo}
+	\small
+	Respuesta del sistema con compensador ante condiciones iniciales $\mathbf{x}(t_0) = [0,\ 0,\ 0]^\intercal$.
+	\vspace{-2mm}
+	\begin{columns}
+		\begin{column}{0.3\textwidth}
+			\footnotesize El observador produce un estimado correcto de las variables de estado.\\
+			\vspace{3mm}
+			El control por retroalimentación de estados garantiza la estabilidad del sistema mientras que la retroalimentación de la salida permite el seguimiento de la referencia.
+		\end{column}
+		\begin{column}{0.7\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=9cm]{images/stateFeedbackTrackingObservationStep.eps}
+			\end{figure}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\section{Conclusión}
+\begin{frame}[<+->]\frametitle{Conclusión}
+	\begin{itemize}
+		\item El método de diseño basado en ubicación de polos combinado con observadores es muy útil.
+		\item Los polos deseados de lazo cerrado pueden ubicarse de manera arbitraria si la planta es completamente controlable.
+		\item Si no todos los estados son medibles, un observador debe ser incorporado para estimarlos.
+		\item Durante el diseño, diferentes conjuntos de polos deseados de lazo cerrado pueden considerarse para seleccionar el que genere un mejor desempeño.
+	\end{itemize}
+\end{frame}
+
+\end{document}
